@@ -22,19 +22,6 @@ public class AuthController {
         this.clienteController = clienteController;
     }
 
-//    @PostMapping("/login")
-//    public ResponseEntity<?> login(@RequestBody AuthRequest request) {
-//        List<ClienteDTO> clientes = clienteController.findAll();
-//
-//        for (ClienteDTO c : clientes) {
-//            if (c.getEmail().equals(request.getEmail()) && c.getSenha().equals(request.getSenha())) {
-//                String token = jwtUtil.generateToken(c.getEmail(), c.getRole());
-//                return ResponseEntity.ok(new AuthResponse(token));
-//            }
-//        }
-//        return ResponseEntity.status(401).body("Credenciais inválidas");
-//    }
-
     // Exemplo de método de autenticação no AuthController
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {

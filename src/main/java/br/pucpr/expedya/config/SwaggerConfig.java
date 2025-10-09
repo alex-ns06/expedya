@@ -16,7 +16,7 @@ public class SwaggerConfig {
                 .info(new Info()
                         .title("Expedya API")
                         .version("1.0")
-                        .description("API de clientes com segurança JWT"))
+                        .description("Sistema de viagens com segurança JWT"))
                 .addSecurityItem(new SecurityRequirement().addList("Bearer Authentication"))
                 .components(new io.swagger.v3.oas.models.Components()
                         .addSecuritySchemes("Bearer Authentication",

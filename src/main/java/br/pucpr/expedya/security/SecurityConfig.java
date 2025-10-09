@@ -20,12 +20,12 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // ❌ Desativa CSRF (para APIs REST)
+                // Desativa CSRF (para APIs REST)
                 .csrf(csrf -> csrf.disable())
-                // ⚙️ Define política stateless (sem sessão de servidor)
+                // Define política stateless (sem sessão de servidor)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // 🔓 Libera acesso ao Swagger
+                        // Libera acesso ao Swagger
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",

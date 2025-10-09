@@ -65,17 +65,7 @@ public class ClienteController {
         return ResponseEntity.notFound().build();
     }
 
-    // DELETE - Excluir cliente
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Integer id) {
-        boolean removed = clientes.removeIf(c -> c.getId().equals(id));
-        if (removed) {
-            return ResponseEntity.noContent().build(); // 204
-        }
-        return ResponseEntity.notFound().build(); // 404
-    }
-
-    // Retorna os nomes das propriedades nulas de um objeto
+    // Retorna os nomes das propriedades nulas de um objeto para o PATCH
     private String[] getNullPropertyNames(Object source) {
         final BeanWrapper src = new BeanWrapperImpl(source);
         java.beans.PropertyDescriptor[] pds = src.getPropertyDescriptors();
@@ -89,4 +79,15 @@ public class ClienteController {
         }
         return emptyNames.toArray(new String[0]);
     }
+
+    // DELETE - Excluir cliente
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Integer id) {
+        boolean removed = clientes.removeIf(c -> c.getId().equals(id));
+        if (removed) {
+            return ResponseEntity.noContent().build(); // 204
+        }
+        return ResponseEntity.notFound().build(); // 404
+    }
+
 }
