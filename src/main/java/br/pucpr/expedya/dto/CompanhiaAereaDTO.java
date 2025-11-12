@@ -5,35 +5,21 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.time.*;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PassagemDTO {
+public class CompanhiaAereaDTO {
     private Integer id;
 
     @NotNull
     @NotBlank
-    private String origem;
+    private String nome;
 
     @NotNull
     @NotBlank
-    private String destino;
+    private String cnpj;
 
-    @NotNull
     @NotBlank
-    private LocalDate data_partida;
-
-    @NotNull
-    @NotBlank
-    private LocalTime hora_partida;
-
-    @NotNull
-    @NotBlank
-    private String assento;
-
-    @NotNull
-    @NotBlank
-    private String classe;
+    private Integer quantidade_avioes;
 }

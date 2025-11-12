@@ -2,6 +2,7 @@ package br.pucpr.expedya.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import java.time.*;
 
 @Data
 @Entity
@@ -11,4 +12,22 @@ public class Passagem {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "ID")
     private Long id;
+
+    @Column(name = "origem")
+    private String origem;
+
+    @Column(name = "destino")
+    private String destino;
+
+    @Column(name = "datapartida")
+    private LocalDate dataPartida;
+
+    @Column(name = "horapartida")
+    private LocalTime horaPartida;
+
+    @Column(name = "assento")
+    private String assento;
+
+    @Column(name = "classe")
+    private String classe;
 }

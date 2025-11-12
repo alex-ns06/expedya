@@ -1,8 +1,8 @@
 package br.pucpr.expedya.repository;
 
+import br.pucpr.expedya.model.CompanhiaAerea;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import br.pucpr.expedya.model.Passagem;
 
-public interface PassagemRepository extends JpaRepository<Passagem, Integer> {
+public interface CompanhiaAereaRepository extends JpaRepository<CompanhiaAerea, Integer> {
 }
