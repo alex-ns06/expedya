@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "companhiaaerea")
+@Table(name = "companhiasaereas")
 public class CompanhiaAerea {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -17,7 +17,4 @@ public class CompanhiaAerea {
 
     @Column(name = "cnpj")
     private String cnpj;
-
-    @Column(name = "avioes")
-    private Integer quantidade_avioes;
 }
