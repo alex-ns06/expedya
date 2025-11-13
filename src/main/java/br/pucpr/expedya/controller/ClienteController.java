@@ -1,93 +1,66 @@
 package br.pucpr.expedya.controller;
 
 import br.pucpr.expedya.dto.ClienteDTO;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
+import br.pucpr.expedya.service.ClienteService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
-import java.util.*;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/clientes")
 @SecurityRequirement(name = "Bearer Authentication")
 public class ClienteController {
 
-    private List<ClienteDTO> clientes = new ArrayList<>();
+    private final ClienteService clienteService;
 
-    // GET - Buscar todos
+    public ClienteController(ClienteService clienteService) {
+        this.clienteService = clienteService;
+    }
+
+    // GET - Buscar todos (SÓ ADMIN)
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public List<ClienteDTO> findAll() {
-        return clientes;
+        return clienteService.findAll();
     }
 
-    // GET - Buscar por ID
+    // GET - Buscar por ID (ADMIN ou o Próprio Usuário)
     @GetMapping("/{id}")
-    public ResponseEntity<ClienteDTO> findById(@PathVariable Integer id) {
-        return clientes.stream()
-                .filter(c -> c.getId().equals(id))
-                .findFirst()
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    @PreAuthorize("hasRole('ADMIN') or @clienteSecurity.checkId(authentication, #id)") // MUDANÇA (Requer Bean de segurança)
+    public ResponseEntity<ClienteDTO> findById(@PathVariable Long id) { // MUDANÇA (Long)
+        return ResponseEntity.ok(clienteService.findById(id)); // MUDANÇA
     }
 
-    // POST - Cadastrar novo cliente
+    // POST - Cadastrar novo cliente (PÚBLICO - Já configurado no SecurityConfig)
     @PostMapping
     public ResponseEntity<ClienteDTO> save(@RequestBody ClienteDTO cliente) {
-        clientes.add(cliente);
-        return ResponseEntity.status(HttpStatus.CREATED).body(cliente);
+        return ResponseEntity.status(HttpStatus.CREATED).body(clienteService.save(cliente)); // MUDANÇA
     }
 
-    // PUT - Atualizar cliente completo
+    // PUT - Atualizar cliente completo (ADMIN ou o Próprio Usuário)
     @PutMapping("/{id}")
-    public ResponseEntity<ClienteDTO> update(@PathVariable Integer id, @RequestBody ClienteDTO clienteAtualizado) {
-        for (int i = 0; i < clientes.size(); i++) {
-            if (clientes.get(i).getId().equals(id)) {
-                clientes.set(i, clienteAtualizado);
-                return ResponseEntity.ok(clienteAtualizado);
-            }
-        }
-        return ResponseEntity.notFound().build();
+    @PreAuthorize("hasRole('ADMIN') or @clienteSecurity.checkId(authentication, #id)") // MUDANÇA
+    public ResponseEntity<ClienteDTO> update(@PathVariable Long id, @RequestBody ClienteDTO clienteAtualizado) { // MUDANÇA (Long)
+        return ResponseEntity.ok(clienteService.update(id, clienteAtualizado)); // MUDANÇA
     }
 
-    // PATCH - Atualizar parcialmente
+    // PATCH - Atualizar parcialmente (ADMIN ou o Próprio Usuário)
     @PatchMapping("/{id}")
-    public ResponseEntity<ClienteDTO> partialUpdate(@PathVariable Integer id, @RequestBody ClienteDTO clienteParcial) {
-        for (ClienteDTO c : clientes) {
-            if (c.getId().equals(id)) {
-                BeanUtils.copyProperties(clienteParcial, c, getNullPropertyNames(clienteParcial));
-                return ResponseEntity.ok(c);
-            }
-        }
-        return ResponseEntity.notFound().build();
+    @PreAuthorize("hasRole('ADMIN') or @clienteSecurity.checkId(authentication, #id)") // MUDANÇA
+    public ResponseEntity<ClienteDTO> partialUpdate(@PathVariable Long id, @RequestBody ClienteDTO clienteParcial) { // MUDANÇA (Long)
+        return ResponseEntity.ok(clienteService.partialUpdate(id, clienteParcial)); // MUDANÇA
     }
 
-    // Retorna os nomes das propriedades nulas de um objeto para o PATCH
-    private String[] getNullPropertyNames(Object source) {
-        final BeanWrapper src = new BeanWrapperImpl(source);
-        java.beans.PropertyDescriptor[] pds = src.getPropertyDescriptors();
-
-        Set<String> emptyNames = new HashSet<>();
-        for (java.beans.PropertyDescriptor pd : pds) {
-            Object srcValue = src.getPropertyValue(pd.getName());
-            if (srcValue == null) {
-                emptyNames.add(pd.getName());
-            }
-        }
-        return emptyNames.toArray(new String[0]);
-    }
-
-    // DELETE - Excluir cliente
+    // DELETE - Excluir cliente (SÓ ADMIN)
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Integer id) {
-        boolean removed = clientes.removeIf(c -> c.getId().equals(id));
-        if (removed) {
-            return ResponseEntity.noContent().build(); // 204
-        }
-        return ResponseEntity.notFound().build(); // 404
+    @PreAuthorize("hasRole('ADMIN')") // MUDANÇA
+    public ResponseEntity<Void> delete(@PathVariable Long id) { // MUDANÇA (Long)
+        clienteService.delete(id); // MUDANÇA
+        return ResponseEntity.noContent().build();
     }
 
 }
