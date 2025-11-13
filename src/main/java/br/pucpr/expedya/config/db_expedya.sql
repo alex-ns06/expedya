@@ -18,22 +18,22 @@ CREATE TABLE Passagens (
     DataPartida DATE NOT NULL,
     HoraPartida TIME NOT NULL,
     Assento VARCHAR(4) NOT NULL,
-    Classe VARCHAR NOT NULL
+    Classe VARCHAR NOT NULL,
+    fk_CompanhiaAerea_ID SERIAL NOT NULL,
+    fk_Aviao_ID SERIAL NOT NULL
 );
 
 CREATE TABLE CompanhiaAerea (
     ID SERIAL PRIMARY KEY,
     Nome VARCHAR NOT NULL,
-    CNPJ VARCHAR(18) UNIQUE NOT NULL,
-    fk_Passagens_ID SERIAL NOT NULL
+    CNPJ VARCHAR(18) UNIQUE NOT NULL
 );
 
 CREATE TABLE Aviao (
     ID SERIAL PRIMARY KEY,
     Modelo VARCHAR NOT NULL,
     Codigo VARCHAR NOT NULL,
-    Capacidade INT NOT NULL,
-    fk_Passagens_ID SERIAL NOT NULL
+    Capacidade INT NOT NULL
 );
 
 CREATE TABLE Passageiro (
@@ -52,14 +52,14 @@ ALTER TABLE Clientes ADD CONSTRAINT FK_Clientes_2
     REFERENCES Passagens (ID)
     ON DELETE CASCADE;
 
-ALTER TABLE CompanhiaAerea ADD CONSTRAINT FK_CompanhiaAerea_2
-    FOREIGN KEY (fk_Passagens_ID)
-    REFERENCES Passagens (ID)
+ALTER TABLE Passagens ADD CONSTRAINT FK_Passagens_2
+    FOREIGN KEY (fk_CompanhiaAerea_ID)
+    REFERENCES CompanhiaAerea (ID)
     ON DELETE RESTRICT;
 
-ALTER TABLE Aviao ADD CONSTRAINT FK_Aviao_2
-    FOREIGN KEY (fk_Passagens_ID)
-    REFERENCES Passagens (ID)
+ALTER TABLE Passagens ADD CONSTRAINT FK_Passagens_3
+    FOREIGN KEY (fk_Aviao_ID)
+    REFERENCES Aviao (ID)
     ON DELETE RESTRICT;
 
 ALTER TABLE Passageiro ADD CONSTRAINT FK_Passageiro_1
