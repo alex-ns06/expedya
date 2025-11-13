@@ -3,7 +3,7 @@ package br.pucpr.expedya.service;
 import br.pucpr.expedya.dto.ClienteDTO;
 import br.pucpr.expedya.exception.ResourceNotFoundException;
 import br.pucpr.expedya.model.Cliente;
-import br.pucpr.expedya.model.enuns.Role;
+import br.pucpr.expedya.security.Role;
 import br.pucpr.expedya.repository.ClienteRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;

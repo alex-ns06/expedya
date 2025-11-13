@@ -1,6 +1,6 @@
 package br.pucpr.expedya.dto;
 
-import br.pucpr.expedya.model.enuns.Role;
+import br.pucpr.expedya.security.Role;
 
 public class ClienteDTO {
 

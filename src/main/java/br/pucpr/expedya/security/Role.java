@@ -1,4 +1,4 @@
-package br.pucpr.expedya.model.enuns;
+package br.pucpr.expedya.security;
 
 public enum Role {
     ADMIN,

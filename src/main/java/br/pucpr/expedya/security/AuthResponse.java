@@ -1,4 +1,4 @@
-package br.pucpr.expedya.dto;
+package br.pucpr.expedya.security;
 
 public class AuthResponse {
     private String token;
