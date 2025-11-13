@@ -4,6 +4,7 @@ import br.pucpr.expedya.dto.AviaoDTO;
 import br.pucpr.expedya.exception.ResourceNotFoundException;
 import br.pucpr.expedya.model.Aviao;
 import br.pucpr.expedya.model.CompanhiaAerea;
+import br.pucpr.expedya.model.Passagem;
 import br.pucpr.expedya.repository.AviaoRepository;
 import br.pucpr.expedya.repository.CompanhiaAereaRepository;
 import lombok.AllArgsConstructor;
@@ -67,8 +68,15 @@ public class AviaoService {
                 aviao.getModelo(),
                 aviao.getCodigoAeronave(),
                 aviao.getCapacidadePassageiros(),
-                aviao.getCompanhiaAerea().getId(),
-                aviao.getCompanhiaAerea().getNome()
+                aviao.getCompanhias().stream()
+                        .map(CompanhiaAerea::getId)
+                        .collect(Collectors.toSet()),
+                aviao.getCompanhias().stream()
+                        .map(CompanhiaAerea::getNome)
+                        .collect(Collectors.toSet()),
+                aviao.getPassagem().stream()
+                        .map(Passagem::getId)
+                        .collect(Collectors.toSet())
         );
     }
 
@@ -77,7 +85,11 @@ public class AviaoService {
         aviao.setModelo(dto.getModelo());
         aviao.setCodigoAeronave(dto.getCodigoAeronave());
         aviao.setCapacidadePassageiros(dto.getCapacidadePassageiros());
-        aviao.setCompanhiaAerea(companhia);
+
+        if (companhia != null) {
+            aviao.getCompanhias().add(companhia);
+        }
+
         return aviao;
     }
 }

@@ -1,11 +1,15 @@
 package br.pucpr.expedya.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Data
 @Entity
-@Table(name = "avioes")
+@Table(name = "aviao")
 public class Aviao {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -20,7 +24,11 @@ public class Aviao {
     @Column(name = "capacidade_passageiros", nullable = false)
     private Integer capacidadePassageiros;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "companhia_aerea_id", nullable = false)
-    private CompanhiaAerea companhiaAerea;
+    @ManyToMany(mappedBy = "avioes")
+    @JsonIgnore
+    private Set<CompanhiaAerea> companhias = new HashSet<>();
+
+    @OneToMany(mappedBy = "aviao")
+    @JsonIgnore
+    private Set<Passagem> passagem = new HashSet<>();
 }

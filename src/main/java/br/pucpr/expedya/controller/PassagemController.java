@@ -1,7 +1,14 @@
 package br.pucpr.expedya.controller;
 
 import br.pucpr.expedya.dto.PassagemDTO;
+import br.pucpr.expedya.exception.ResourceNotFoundException;
+import br.pucpr.expedya.model.Passagem;
+import br.pucpr.expedya.service.PassagemService;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
@@ -18,81 +25,55 @@ import java.util.ArrayList;
 @RequestMapping("/api/v1/passagens")
 @SecurityRequirement(name = "Bearer Authentication")
 public class PassagemController {
-    private List<PassagemDTO> passagens = new ArrayList<>();
+    private final PassagemService passagemService;
 
-    // GET - Buscar todos
-    @GetMapping
-    public List<PassagemDTO> findAll() { return passagens; }
-
-    // GET - Buscar por ID
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/{id}")
-    public ResponseEntity<PassagemDTO> findById(@PathVariable String id) {
-        return passagens.stream()
-                .filter(p -> p.getId().equals(id))
-                .findFirst()
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public PassagemController(PassagemService passagemService) {
+        this.passagemService = passagemService;
     }
 
-    //POST - Cadastrar nova passagem
-    @PreAuthorize("hasRole('ADMIN')")
+    // POST - Cadastrar nova Passagem
     @PostMapping
-    public ResponseEntity<PassagemDTO> save(@RequestBody PassagemDTO passagem) {
-        passagens.add(passagem);
-        return ResponseEntity.status(HttpStatus.CREATED).body(passagem);
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Passagem criada com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Os dados da Passagem são inválidos")
+    })
+    public ResponseEntity<PassagemDTO> save(@Valid @RequestBody PassagemDTO passagemDTO) {
+        Passagem passagem = new ModelMapper().map(passagemDTO, Passagem.class);
+        passagemService.save(passagem);
+        return ResponseEntity.status(HttpStatus.CREATED).body(passagemDTO);
     }
 
-    // PUT - Atualizar passagem completa
-    @PreAuthorize("hasRole('ADMIN')")
+    // GET - Buscar todas as Passagens
+    @GetMapping
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lista de Passagens retornada com sucesso")
+    })
+    public ResponseEntity<List<PassagemDTO>> findAll() {
+        List<Passagem> passagens = passagemService.findAll();
+        List<PassagemDTO> passagensDTO = passagens.stream()
+                .map(passagem -> new ModelMapper().map(passagem, PassagemDTO.class))
+                .toList();
+        return new ResponseEntity<>(passagensDTO, HttpStatus.OK);
+    }
+
+    // PUT - Atualizar Passagem
     @PutMapping("/{id}")
-    public ResponseEntity<PassagemDTO> update(@PathVariable String id, @RequestBody PassagemDTO passagemAtualizada) {
-        for (int i = 0; i < passagens.size(); i++) {
-            if (passagens.get(i).getId().equals(id)) {
-                passagens.set(i, passagemAtualizada);
-                return ResponseEntity.ok(passagemAtualizada);
-            }
-        }
-        return ResponseEntity.notFound().build();
+    public ResponseEntity<PassagemDTO> update(@PathVariable("id") Integer id, @RequestBody PassagemDTO passagemDTO) {
+//        throws ResourceNotFoundException {
+//            if (id == null || passagemDTO.getId() == null) {
+//                throw new ResourceNotFoundException("O ID é necessário");
+//            }
+//        }
+
+        Passagem passagem = new ModelMapper().map(passagemDTO, Passagem.class);
+        passagemService.save(passagem);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(passagemDTO);
     }
 
-    // PATCH - Atualizar passagem parcialmente
-    @PreAuthorize("hasRole('ADMIN')")
-    @PatchMapping("/{id}")
-    public ResponseEntity<PassagemDTO> partialUpdate(@PathVariable String id, @RequestBody PassagemDTO passagemParcial) {
-        for (PassagemDTO p : passagens) {
-            if (p.getId().equals(id)) {
-                BeanUtils.copyProperties(passagemParcial, p, getNullPropertyNames(passagemParcial));
-                return ResponseEntity.ok(p);
-            }
-        }
-
-        return ResponseEntity.notFound().build();
-    }
-
-    // DELETE - Excluir passagem
-    @PreAuthorize("hasRole('ADMIN')")
+    // DELETE - Deletar Passagem
     @DeleteMapping("/{id}")
-    public ResponseEntity<PassagemDTO> delete(@PathVariable String id) {
-        boolean removed = passagens.removeIf(p -> p.getId().equals(id));
-        if (removed) {
-            return ResponseEntity.noContent().build(); // 204
-        }
-
-        return ResponseEntity.notFound().build(); // 404
-    }
-
-    // Retorna os nomes das propriedades nulas de um objeto
-    private String[] getNullPropertyNames(Object source) {
-        final BeanWrapper src = new BeanWrapperImpl(source);
-        java.beans.PropertyDescriptor[] pds = src.getPropertyDescriptors();
-
-        Set<String> emptyNames = new HashSet<>();
-        for (java.beans.PropertyDescriptor pd : pds) {
-            Object srcValue = src.getPropertyValue(pd.getName());
-            if (srcValue == null) emptyNames.add(pd.getName());
-        }
-
-        return emptyNames.toArray(new String[0]);
+    public void delete(@PathVariable("id") Integer id) {
+        passagemService.delete(id);
     }
 }

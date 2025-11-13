@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Set;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -22,7 +24,10 @@ public class AviaoDTO {
     private Integer capacidadePassageiros;
 
     @NotNull
-    private Long companhiaAereaId; // ID para integração
+    private Set<Long> companhiaAereaId; // ID para integração
 
-    private String nomeCompanhiaAerea; // Campo opcional para leitura
+    private Set<String> nomesCompanhiasAereas; // Campo opcional para leitura
+
+    @NotNull
+    private Set<Long> passagemId; // ID para integração
 }

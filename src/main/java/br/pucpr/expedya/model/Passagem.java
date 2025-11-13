@@ -30,4 +30,12 @@ public class Passagem {
 
     @Column(name = "classe")
     private String classe;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "fk_companhiaaerea_id")
+    private CompanhiaAerea companhiaAerea;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "fk_aviao_id")
+    private Aviao aviao;
 }

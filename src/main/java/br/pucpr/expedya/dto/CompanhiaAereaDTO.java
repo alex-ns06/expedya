@@ -20,6 +20,11 @@ public class CompanhiaAereaDTO {
     @NotBlank
     private String cnpj;
 
-    @NotBlank
-    private Integer quantidade_avioes;
+    @NotNull
+    private Long passagensId; // ID para integração
+
+    @NotNull
+    private Long aviaoId; // ID para integração
+
+    private String modeloAviao; // Campo opcional para leitura
 }
