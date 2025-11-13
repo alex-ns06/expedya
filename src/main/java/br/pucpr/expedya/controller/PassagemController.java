@@ -1,7 +1,6 @@
 package br.pucpr.expedya.controller;
 
 import br.pucpr.expedya.dto.PassagemDTO;
-import br.pucpr.expedya.exception.ResourceNotFoundException;
 import br.pucpr.expedya.model.Passagem;
 import br.pucpr.expedya.service.PassagemService;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -9,17 +8,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
-
-import java.util.ArrayList;
 
 @RestController
 @RequestMapping("/api/v1/passagens")

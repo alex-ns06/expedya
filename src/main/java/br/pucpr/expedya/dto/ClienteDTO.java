@@ -1,5 +1,7 @@
 package br.pucpr.expedya.dto;
 
+import br.pucpr.expedya.model.enuns.Role;
+
 public class ClienteDTO {
 
     private Long id;
@@ -11,7 +13,7 @@ public class ClienteDTO {
     private String passaporte;
     private String senha;
 
-    private String role; // ADMIN / USER
+    private Role role; // ADMIN / USER
 
     public Long getId() {
         return id;
@@ -69,11 +71,11 @@ public class ClienteDTO {
         this.senha = senha;
     }
 
-    public String getRole() {
+    public Role getRole() {
         return role;
     }
 
-    public void setRole(String role) {
+    public void setRole(Role role) {
         this.role = role;
     }
 }

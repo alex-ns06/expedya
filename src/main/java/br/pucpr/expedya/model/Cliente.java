@@ -1,5 +1,6 @@
 package br.pucpr.expedya.model;
 
+import br.pucpr.expedya.model.enuns.Role; // IMPORTAR
 import jakarta.persistence.*;
 import lombok.Data;
 

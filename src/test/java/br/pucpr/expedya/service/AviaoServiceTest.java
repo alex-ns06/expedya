@@ -1,7 +1,6 @@
 package br.pucpr.expedya.service;
 
 import br.pucpr.expedya.dto.AviaoDTO;
-import br.pucpr.expedya.exception.ResourceNotFoundException;
 import br.pucpr.expedya.model.Aviao;
 import br.pucpr.expedya.model.CompanhiaAerea;
 import br.pucpr.expedya.repository.AviaoRepository;

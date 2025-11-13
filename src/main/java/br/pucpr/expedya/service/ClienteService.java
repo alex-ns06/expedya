@@ -3,6 +3,7 @@ package br.pucpr.expedya.service;
 import br.pucpr.expedya.dto.ClienteDTO;
 import br.pucpr.expedya.exception.ResourceNotFoundException;
 import br.pucpr.expedya.model.Cliente;
+import br.pucpr.expedya.model.enuns.Role;
 import br.pucpr.expedya.repository.ClienteRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -29,8 +30,8 @@ public class ClienteService {
         cliente.setSenha(passwordEncoder.encode(dto.getSenha()));
 
         // Define um role padrão se não for fornecido
-        if (dto.getRole() == null || dto.getRole().isEmpty()) {
-            cliente.setRole("USER");
+        if (dto.getRole() == null) {
+            cliente.setRole(Role.USER);
         }
 
         Cliente savedCliente = clienteRepository.save(cliente);

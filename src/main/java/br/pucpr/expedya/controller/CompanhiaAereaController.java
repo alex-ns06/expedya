@@ -1,10 +1,8 @@
 package br.pucpr.expedya.controller;
 
 import br.pucpr.expedya.dto.CompanhiaAereaDTO;
-import br.pucpr.expedya.exception.ResourceNotFoundException;
 import br.pucpr.expedya.model.CompanhiaAerea;
 import br.pucpr.expedya.service.CompanhiaAereaService;
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -15,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
