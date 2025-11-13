@@ -2,7 +2,7 @@ package br.pucpr.expedya.dto;
 
 public class ClienteDTO {
 
-    private Integer id;
+    private Long id;
 
     private String nomeCompleto;
     private String email;
@@ -13,11 +13,11 @@ public class ClienteDTO {
 
     private String role; // ADMIN / USER
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

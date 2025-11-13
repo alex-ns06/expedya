@@ -20,7 +20,7 @@ public class AviaoService {
     private final CompanhiaAereaRepository companhiaAereaRepository; // Para integração
 
     public AviaoDTO save(AviaoDTO dto) {
-        CompanhiaAerea companhia = companhiaAereaRepository.findById(dto.getCompanhiaAereaId())
+        CompanhiaAerea companhia = companhiaAereaRepository.findById(Math.toIntExact(dto.getCompanhiaAereaId()))
                 .orElseThrow(() -> new ResourceNotFoundException("CompanhiaAerea não encontrada com id: " + dto.getCompanhiaAereaId()));
 
         Aviao aviao = toEntity(dto, companhia);
@@ -32,7 +32,7 @@ public class AviaoService {
         aviaoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Aviao não encontrado com id: " + id));
 
-        CompanhiaAerea companhia = companhiaAereaRepository.findById(dto.getCompanhiaAereaId())
+        CompanhiaAerea companhia = companhiaAereaRepository.findById(Math.toIntExact(dto.getCompanhiaAereaId()))
                 .orElseThrow(() -> new ResourceNotFoundException("CompanhiaAerea não encontrada com id: " + dto.getCompanhiaAereaId()));
 
         Aviao aviao = toEntity(dto, companhia);
