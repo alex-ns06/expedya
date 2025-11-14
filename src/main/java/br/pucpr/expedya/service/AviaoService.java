@@ -1,6 +1,7 @@
 package br.pucpr.expedya.service;
 
 import br.pucpr.expedya.dto.AviaoDTO;
+import br.pucpr.expedya.exception.ResourceNotFoundException;
 import br.pucpr.expedya.model.Aviao;
 import br.pucpr.expedya.model.CompanhiaAerea;
 import br.pucpr.expedya.model.Passagem;
@@ -10,6 +11,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -20,10 +22,12 @@ public class AviaoService {
     private final CompanhiaAereaRepository companhiaAereaRepository; // Para integração
 
     public AviaoDTO save(AviaoDTO dto) {
-        CompanhiaAerea companhia = companhiaAereaRepository.findById(Math.toIntExact(dto.getCompanhiaAereaId()))
-                .orElseThrow(() -> new ResourceNotFoundException("CompanhiaAerea não encontrada com id: " + dto.getCompanhiaAereaId()));
+        Set<CompanhiaAerea> companhias = dto.getCompanhiaAereaId().stream()
+                .map(id -> companhiaAereaRepository.findById(Math.toIntExact(id))
+                        .orElseThrow(() -> new ResourceNotFoundException("CompanhiaAerea não encontrada com id: " + id)))
+                .collect(Collectors.toSet());
 
-        Aviao aviao = toEntity(dto, companhia);
+        Aviao aviao = toEntity(dto, companhias);
         Aviao savedAviao = aviaoRepository.save(aviao);
         return toDTO(savedAviao);
     }
@@ -32,10 +36,12 @@ public class AviaoService {
         aviaoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Aviao não encontrado com id: " + id));
 
-        CompanhiaAerea companhia = companhiaAereaRepository.findById(Math.toIntExact(dto.getCompanhiaAereaId()))
-                .orElseThrow(() -> new ResourceNotFoundException("CompanhiaAerea não encontrada com id: " + dto.getCompanhiaAereaId()));
+        Set<CompanhiaAerea> companhias = dto.getCompanhiaAereaId().stream()
+                .map(companyId -> companhiaAereaRepository.findById(Math.toIntExact(id))
+                        .orElseThrow(() -> new ResourceNotFoundException("CompanhiaAerea não encontrada com id: " + companyId)))
+                .collect(Collectors.toSet());
 
-        Aviao aviao = toEntity(dto, companhia);
+        Aviao aviao = toEntity(dto, companhias);
         aviao.setId(id); // Garante que é uma atualização
         Aviao updatedAviao = aviaoRepository.save(aviao);
         return toDTO(updatedAviao);
@@ -79,14 +85,14 @@ public class AviaoService {
         );
     }
 
-    private Aviao toEntity(AviaoDTO dto, CompanhiaAerea companhia) {
+    private Aviao toEntity(AviaoDTO dto, Set<CompanhiaAerea> companhias) {
         Aviao aviao = new Aviao();
         aviao.setModelo(dto.getModelo());
         aviao.setCodigoAeronave(dto.getCodigoAeronave());
         aviao.setCapacidadePassageiros(dto.getCapacidadePassageiros());
 
-        if (companhia != null) {
-            aviao.getCompanhias().add(companhia);
+        if (companhias != null) {
+            aviao.setCompanhias(companhias);
         }
 
         return aviao;

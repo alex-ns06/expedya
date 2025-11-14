@@ -1,8 +1,10 @@
 package br.pucpr.expedya.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.*;
+import java.util.List;
 
 @Data
 @Entity
@@ -38,4 +40,8 @@ public class Passagem {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fk_aviao_id")
     private Aviao aviao;
+
+    @OneToMany(mappedBy = "passagem", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference // Evita loop infinito
+    private List<Cliente> clientes;
 }

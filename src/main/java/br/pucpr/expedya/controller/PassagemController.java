@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -30,6 +31,7 @@ public class PassagemController {
             @ApiResponse(responseCode = "201", description = "Passagem criada com sucesso"),
             @ApiResponse(responseCode = "400", description = "Os dados da Passagem são inválidos")
     })
+    @PreAuthorize("hasRole('ADMIN') or @clienteSecurity.checkId(authentication, #id)")
     public ResponseEntity<PassagemDTO> save(@Valid @RequestBody PassagemDTO passagemDTO) {
         Passagem passagem = new ModelMapper().map(passagemDTO, Passagem.class);
         passagemService.save(passagem);
@@ -41,6 +43,7 @@ public class PassagemController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Lista de Passagens retornada com sucesso")
     })
+    @PreAuthorize("hasRole('ADMIN') or @clienteSecurity.checkId(authentication, #id)")
     public ResponseEntity<List<PassagemDTO>> findAll() {
         List<Passagem> passagens = passagemService.findAll();
         List<PassagemDTO> passagensDTO = passagens.stream()
@@ -51,13 +54,8 @@ public class PassagemController {
 
     // PUT - Atualizar Passagem
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or @clienteSecurity.checkId(authentication, #id)")
     public ResponseEntity<PassagemDTO> update(@PathVariable("id") Integer id, @RequestBody PassagemDTO passagemDTO) {
-//        throws ResourceNotFoundException {
-//            if (id == null || passagemDTO.getId() == null) {
-//                throw new ResourceNotFoundException("O ID é necessário");
-//            }
-//        }
-
         Passagem passagem = new ModelMapper().map(passagemDTO, Passagem.class);
         passagemService.save(passagem);
 
@@ -66,6 +64,7 @@ public class PassagemController {
 
     // DELETE - Deletar Passagem
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or @clienteSecurity.checkId(authentication, #id)")
     public void delete(@PathVariable("id") Integer id) {
         passagemService.delete(id);
     }
