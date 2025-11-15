@@ -11,7 +11,8 @@ import java.util.Set;
 @Table(name = "companhiasaereas")
 public class CompanhiaAerea {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "companhias_generator")
+    @SequenceGenerator(name = "companhias_generator", sequenceName = "companhias_id_seq", allocationSize = 1)
     @Column(name = "ID")
     private Long id;
 

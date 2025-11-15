@@ -58,16 +58,16 @@ public class SecurityConfig {
                                 "/webjars/**"
                         ).permitAll()
 
-                        // 🔓 Libera endpoints públicos
+                        // Libera endpoints públicos
                         .requestMatchers("/api/v1/auth/**").permitAll() // Login
                         .requestMatchers(HttpMethod.POST, "/api/v1/clientes").permitAll() // Cadastro de cliente
 
-                        // 🔒 Qualquer outra rota exige autenticação
+                        // Qualquer outra rota exige autenticação
                         // As regras específicas (ADMIN, USER) serão tratadas
                         // nos controllers com @PreAuthorize
                         .anyRequest().authenticated()
                 )
-                // 🧱 Adiciona o filtro JWT antes do filtro padrão de autenticação
+                // Adiciona o filtro JWT antes do filtro padrão de autenticação
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
