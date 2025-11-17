@@ -11,29 +11,25 @@ import java.time.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PassagemDTO {
-    private Integer id;
+    private Long id;
 
-    @NotNull
     @NotBlank
     private String origem;
 
-    @NotNull
     @NotBlank
     private String destino;
 
     @NotNull
-    @NotBlank
-    private LocalDate data_partida;
+    private LocalDate dataPartida;
 
     @NotNull
-    @NotBlank
-    private LocalTime hora_partida;
+    private LocalTime horaPartida;
 
-    @NotNull
     @NotBlank
     private String assento;
 
-    @NotNull
     @NotBlank
     private String classe;
+
+    private Long aviaoId;
 }

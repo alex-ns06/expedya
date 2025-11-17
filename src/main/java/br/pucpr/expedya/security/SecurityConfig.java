@@ -14,7 +14,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
-@EnableMethodSecurity // Habilita o uso do @PreAuthorize nos controllers
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
@@ -23,19 +23,11 @@ public class SecurityConfig {
         this.jwtFilter = jwtFilter;
     }
 
-    /**
-     * Bean para expor o PasswordEncoder (BCrypt) para a aplicação.
-     * Usado no ClienteService para criptografar a senha antes de salvar.
-     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    /**
-     * Bean para expor o AuthenticationManager.
-     * Usado no AuthController para processar a tentativa de login.
-     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
@@ -43,13 +35,23 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
         http
-                // Desativa CSRF (para APIs REST)
+                // Desativa CSRF para APIs REST
                 .csrf(csrf -> csrf.disable())
-                // Define política stateless (sem sessão de servidor)
+
+                // Necessário para permitir o H2 usar frames HTML
+                .headers(headers -> headers.frameOptions(frame -> frame.disable()))
+
+                // Política stateless (JWT)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
                 .authorizeHttpRequests(auth -> auth
-                        // Libera acesso ao Swagger
+
+                        // H2 Console liberado
+                        .requestMatchers("/h2-console/**").permitAll()
+
+                        // Swagger liberado
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
@@ -58,16 +60,15 @@ public class SecurityConfig {
                                 "/webjars/**"
                         ).permitAll()
 
-                        // Libera endpoints públicos
+                        // Endpoints públicos
                         .requestMatchers("/api/v1/auth/**").permitAll() // Login
                         .requestMatchers(HttpMethod.POST, "/api/v1/clientes").permitAll() // Cadastro de cliente
 
-                        // Qualquer outra rota exige autenticação
-                        // As regras específicas (ADMIN, USER) serão tratadas
-                        // nos controllers com @PreAuthorize
+                        // Todo o resto exige autenticação
                         .anyRequest().authenticated()
                 )
-                // Adiciona o filtro JWT antes do filtro padrão de autenticação
+
+                // Filtro JWT antes do filtro padrão
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

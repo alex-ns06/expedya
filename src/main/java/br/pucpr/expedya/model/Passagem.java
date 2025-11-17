@@ -2,24 +2,31 @@ package br.pucpr.expedya.model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.Data;
-import java.time.*;
+import lombok.*;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "passagens")
 public class Passagem {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "passagens_generator")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "passagens_generator")
     @SequenceGenerator(name = "passagens_generator", sequenceName = "passagens_id_seq", allocationSize = 1)
-    @Column(name = "ID")
+    @Column(name = "id")
     private Long id;
 
-    @Column(name = "origem")
+    @Column(name = "origem", nullable = false)
     private String origem;
 
-    @Column(name = "destino")
+    @Column(name = "destino", nullable = false)
     private String destino;
 
     @Column(name = "datapartida")
@@ -34,15 +41,21 @@ public class Passagem {
     @Column(name = "classe")
     private String classe;
 
+    // Mantemos referência explícita à companhia aérea (opcional)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fk_companhiaaerea_id")
+    @ToString.Exclude
     private CompanhiaAerea companhiaAerea;
 
+    // Avião usado pela passagem
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fk_aviao_id")
+    @ToString.Exclude
     private Aviao aviao;
 
-    @OneToMany(mappedBy = "passagem", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonManagedReference // Evita loop infinito
-    private List<Cliente> clientes;
+    // Clientes que possuem essa passagem (1 passagem pode ter vários clientes)
+    @OneToMany(mappedBy = "passagem", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonManagedReference
+    @ToString.Exclude
+    private List<Cliente> clientes = new ArrayList<>();
 }

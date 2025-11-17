@@ -22,98 +22,95 @@ import java.util.stream.Collectors;
 public class ClienteService {
 
     private final ClienteRepository clienteRepository;
-    private final PasswordEncoder passwordEncoder; // Para criptografar a senha
+    private final PasswordEncoder passwordEncoder;
 
+    // ---------- CREATE ----------
     public ClienteDTO save(ClienteDTO dto) {
         Cliente cliente = toEntity(dto);
-        // Criptografa a senha antes de salvar
+
         cliente.setSenha(passwordEncoder.encode(dto.getSenha()));
 
-        // Define um role padrão se não for fornecido
         if (dto.getRole() == null) {
             cliente.setRole(Role.USER);
         }
 
-        Cliente savedCliente = clienteRepository.save(cliente);
-        return toDTO(savedCliente);
+        return toDTO(clienteRepository.save(cliente));
     }
 
+    // ---------- FULL UPDATE (PUT) ----------
     public ClienteDTO update(Long id, ClienteDTO dto) {
-        Cliente cliente = clienteRepository.findById(id)
+        Cliente existing = clienteRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado com id: " + id));
 
-        Cliente updatedCliente = toEntity(dto);
-        updatedCliente.setId(id); // Garante a atualização
+        Cliente updated = toEntity(dto);
+        updated.setId(id);
 
-        // Mantém a senha antiga se a nova for nula/vazia
         if (dto.getSenha() == null || dto.getSenha().isEmpty()) {
-            updatedCliente.setSenha(cliente.getSenha());
+            updated.setSenha(existing.getSenha());
         } else {
-            updatedCliente.setSenha(passwordEncoder.encode(dto.getSenha()));
+            updated.setSenha(passwordEncoder.encode(dto.getSenha()));
         }
 
-        Cliente savedCliente = clienteRepository.save(updatedCliente);
-        return toDTO(savedCliente);
+        return toDTO(clienteRepository.save(updated));
     }
 
+    // ---------- PARTIAL UPDATE (PATCH) ----------
     public ClienteDTO partialUpdate(Long id, ClienteDTO dto) {
         Cliente cliente = clienteRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado com id: " + id));
 
-        // Copia propriedades não nulas
         BeanUtils.copyProperties(dto, cliente, getNullPropertyNames(dto));
 
-        // Trata a senha separadamente
         if (dto.getSenha() != null && !dto.getSenha().isEmpty()) {
             cliente.setSenha(passwordEncoder.encode(dto.getSenha()));
         }
 
-        Cliente updatedCliente = clienteRepository.save(cliente);
-        return toDTO(updatedCliente);
+        return toDTO(clienteRepository.save(cliente));
     }
 
+    // ---------- GET ALL ----------
     public List<ClienteDTO> findAll() {
-        return clienteRepository.findAll().stream()
+        return clienteRepository.findAll()
+                .stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
+    // ---------- GET BY ID ----------
     public ClienteDTO findById(Long id) {
         Cliente cliente = clienteRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado com id: " + id));
         return toDTO(cliente);
     }
 
+    // ---------- DELETE ----------
     public void delete(Long id) {
         Cliente cliente = clienteRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado com id: " + id));
         clienteRepository.delete(cliente);
     }
 
-    // --- Mapeadores DTO <-> Entity ---
-    private ClienteDTO toDTO(Cliente cliente) {
-        ClienteDTO dto = new ClienteDTO();
-        BeanUtils.copyProperties(cliente, dto);
-        dto.setSenha(null); // Nunca retornar a senha
-        return dto;
-    }
-
+    // ---------- MAPEAMENTO DTO → ENTITY ----------
     private Cliente toEntity(ClienteDTO dto) {
         Cliente cliente = new Cliente();
         BeanUtils.copyProperties(dto, cliente);
         return cliente;
     }
 
-    // --- Helper para o PATCH ---
+    // ---------- MAPEAMENTO ENTITY → DTO ----------
+    private ClienteDTO toDTO(Cliente cliente) {
+        ClienteDTO dto = new ClienteDTO();
+        BeanUtils.copyProperties(cliente, dto);
+        dto.setSenha(null);
+        return dto;
+    }
+
+    // ---------- IGNORA CAMPOS NULOS NO PATCH ----------
     private String[] getNullPropertyNames(Object source) {
-        final BeanWrapper src = new BeanWrapperImpl(source);
-        java.beans.PropertyDescriptor[] pds = src.getPropertyDescriptors();
-        Set<String> emptyNames = new HashSet<>();
-        for (java.beans.PropertyDescriptor pd : pds) {
-            if (src.getPropertyValue(pd.getName()) == null) {
-                emptyNames.add(pd.getName());
-            }
-        }
-        return emptyNames.toArray(new String[0]);
+        BeanWrapper src = new BeanWrapperImpl(source);
+        return java.util.Arrays.stream(src.getPropertyDescriptors())
+                .map(pd -> pd.getName())
+                .filter(name -> src.getPropertyValue(name) == null)
+                .toArray(String[]::new);
     }
 }

@@ -1,38 +1,41 @@
 package br.pucpr.expedya.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 import java.util.HashSet;
 import java.util.Set;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
-@Table(name = "companhiasaereas")
+@Table(name = "companhias_aereas")
 public class CompanhiaAerea {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "companhias_generator")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "companhias_generator")
     @SequenceGenerator(name = "companhias_generator", sequenceName = "companhias_id_seq", allocationSize = 1)
-    @Column(name = "ID")
     private Long id;
 
-    @Column(name = "nome")
+    @Column(name = "nome", nullable = false)
     private String nome;
 
     @Column(name = "cnpj")
     private String cnpj;
 
-    @Column(name = "fk_passagens_ID")
-    private Long passagensId;
-
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "Pertence",
-            joinColumns = @JoinColumn(name = "fk_companhiaaerea_ID"),
-            inverseJoinColumns = @JoinColumn(name = "fk_aviao_ID")
-    )
+    /**
+     * Aviões dessa companhia
+     */
+    @OneToMany(mappedBy = "companhiaAerea", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @ToString.Exclude
     private Set<Aviao> avioes = new HashSet<>();
 
-    @OneToMany(mappedBy = "companhiaAerea")
+    /**
+     * Passagens operadas por essa companhia (opcional: pode ser derivada via avioes -> passagens)
+     */
+    @OneToMany(mappedBy = "companhiaAerea", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @ToString.Exclude
     private Set<Passagem> passagens = new HashSet<>();
 }

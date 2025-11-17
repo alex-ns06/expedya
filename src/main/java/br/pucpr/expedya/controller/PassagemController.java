@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,56 +17,49 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
 @RestController
-@RequestMapping("/api/v1/passagens")
-@SecurityRequirement(name = "Bearer Authentication")
+@RequestMapping("/passagens")
+@RequiredArgsConstructor
 public class PassagemController {
+
     private final PassagemService passagemService;
 
-    public PassagemController(PassagemService passagemService) {
-        this.passagemService = passagemService;
-    }
-
-    // POST - Cadastrar nova Passagem
     @PostMapping
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Passagem criada com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Os dados da Passagem são inválidos")
-    })
-    @PreAuthorize("hasRole('ADMIN') or @clienteSecurity.checkId(authentication, #id)")
-    public ResponseEntity<PassagemDTO> save(@Valid @RequestBody PassagemDTO passagemDTO) {
-        Passagem passagem = new ModelMapper().map(passagemDTO, Passagem.class);
-        passagemService.save(passagem);
-        return ResponseEntity.status(HttpStatus.CREATED).body(passagemDTO);
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Passagem> save(@RequestBody Passagem passagem) {
+        return ResponseEntity.ok(passagemService.save(passagem));
     }
 
-    // GET - Buscar todas as Passagens
     @GetMapping
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Lista de Passagens retornada com sucesso")
-    })
-    @PreAuthorize("hasRole('ADMIN') or @clienteSecurity.checkId(authentication, #id)")
-    public ResponseEntity<List<PassagemDTO>> findAll() {
-        List<Passagem> passagens = passagemService.findAll();
-        List<PassagemDTO> passagensDTO = passagens.stream()
-                .map(passagem -> new ModelMapper().map(passagem, PassagemDTO.class))
-                .toList();
-        return new ResponseEntity<>(passagensDTO, HttpStatus.OK);
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<Passagem>> findAll() {
+        return ResponseEntity.ok(passagemService.findAll());
     }
 
-    // PUT - Atualizar Passagem
+    @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Passagem> findById(@PathVariable Integer id) {
+        return passagemService.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or @clienteSecurity.checkId(authentication, #id)")
-    public ResponseEntity<PassagemDTO> update(@PathVariable("id") Integer id, @RequestBody PassagemDTO passagemDTO) {
-        Passagem passagem = new ModelMapper().map(passagemDTO, Passagem.class);
-        passagemService.save(passagem);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(passagemDTO);
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Passagem> update(@PathVariable Integer id, @RequestBody Passagem passagem) {
+        passagem.setId(id);
+        return ResponseEntity.ok(passagemService.save(passagem));
     }
 
-    // DELETE - Deletar Passagem
+    @PatchMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Passagem> partialUpdate(@PathVariable Integer id, @RequestBody Passagem passagem) {
+        return ResponseEntity.ok(passagemService.partialUpdate(id, passagem));
+    }
+
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or @clienteSecurity.checkId(authentication, #id)")
-    public void delete(@PathVariable("id") Integer id) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> delete(@PathVariable Integer id) {
         passagemService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }

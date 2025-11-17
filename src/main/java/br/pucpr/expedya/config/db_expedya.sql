@@ -1,84 +1,75 @@
-/* Lógico_expedy_1: */
+----------------------------------------------------------
+-- DROPS (na ordem correta por causa das FKs)
+----------------------------------------------------------
+DROP TABLE IF EXISTS Pertence;
+DROP TABLE IF EXISTS Passageiro;
+DROP TABLE IF EXISTS Passagens;
+DROP TABLE IF EXISTS Clientes;
+DROP TABLE IF EXISTS Aviao;
+DROP TABLE IF EXISTS CompanhiaAerea;
 
-CREATE TABLE Clientes (
-    ID INT PRIMARY KEY AUTO_INCREMENT,
-    Nome VARCHAR NOT NULL,
-    Email VARCHAR NOT NULL,
-    Passaporte VARCHAR NOT NULL,
-    Telefone VARCHAR NOT NULL,
-    CPF VARCHAR(14) UNIQUE NOT NULL,
-    Senha VARCHAR NOT NULL,
-    Funcao VARCHAR NOT NULL,
-    fk_Passagens_ID INT
-);
-
-CREATE TABLE Passagens (
-    ID INT PRIMARY KEY AUTO_INCREMENT,
-    Origem VARCHAR NOT NULL,
-    Destino VARCHAR NOT NULL,
-    DataPartida DATE NOT NULL,
-    HoraPartida TIME NOT NULL,
-    Assento VARCHAR(4) NOT NULL,
-    Classe VARCHAR NOT NULL,
-    fk_CompanhiaAerea_ID INT NOT NULL,
-    fk_Aviao_ID INT NOT NULL
-);
+----------------------------------------------------------
+-- CREATE TABLES
+----------------------------------------------------------
 
 CREATE TABLE CompanhiaAerea (
-    ID INT PRIMARY KEY AUTO_INCREMENT,
-    Nome VARCHAR NOT NULL,
+    ID INT AUTO_INCREMENT PRIMARY KEY,
+    Nome VARCHAR(255) NOT NULL,
     CNPJ VARCHAR(18) UNIQUE NOT NULL
 );
 
 CREATE TABLE Aviao (
-    ID INT PRIMARY KEY AUTO_INCREMENT,
-    Modelo VARCHAR NOT NULL,
-    Codigo VARCHAR NOT NULL,
+    ID INT AUTO_INCREMENT PRIMARY KEY,
+    Modelo VARCHAR(255) NOT NULL,
+    Codigo VARCHAR(255) NOT NULL,
     Capacidade INT NOT NULL
+);
+
+CREATE TABLE Passagens (
+    ID INT AUTO_INCREMENT PRIMARY KEY,
+    Origem VARCHAR(255) NOT NULL,
+    Destino VARCHAR(255) NOT NULL,
+    DataPartida DATE NOT NULL,
+    HoraPartida TIME NOT NULL,
+    Assento VARCHAR(4) NOT NULL,
+    Classe VARCHAR(255) NOT NULL,
+    fk_CompanhiaAerea_ID INT NOT NULL,
+    fk_Aviao_ID INT NOT NULL,
+    CONSTRAINT FK_Passagens_Companhia FOREIGN KEY (fk_CompanhiaAerea_ID)
+        REFERENCES CompanhiaAerea(ID) ON DELETE RESTRICT,
+    CONSTRAINT FK_Passagens_Aviao FOREIGN KEY (fk_Aviao_ID)
+        REFERENCES Aviao(ID) ON DELETE RESTRICT
+);
+
+CREATE TABLE Clientes (
+    ID INT AUTO_INCREMENT PRIMARY KEY,
+    Nome VARCHAR(255) NOT NULL,
+    Email VARCHAR(255) NOT NULL,
+    Passaporte VARCHAR(255) NOT NULL,
+    Telefone VARCHAR(255) NOT NULL,
+    CPF VARCHAR(14) UNIQUE NOT NULL,
+    Senha VARCHAR(255) NOT NULL,
+    Funcao VARCHAR(255) NOT NULL,
+    fk_Passagens_ID INT,
+    CONSTRAINT FK_Clientes_Passagens FOREIGN KEY (fk_Passagens_ID)
+        REFERENCES Passagens(ID) ON DELETE CASCADE
 );
 
 CREATE TABLE Passageiro (
     fk_Clientes_ID INT PRIMARY KEY,
-    fk_CompanhiaAerea_ID INT NOT NULL
+    fk_CompanhiaAerea_ID INT NOT NULL,
+    CONSTRAINT FK_Passageiro_Cliente FOREIGN KEY (fk_Clientes_ID)
+        REFERENCES Clientes(ID) ON DELETE RESTRICT,
+    CONSTRAINT FK_Passageiro_Companhia FOREIGN KEY (fk_CompanhiaAerea_ID)
+        REFERENCES CompanhiaAerea(ID) ON DELETE RESTRICT
 );
 
 CREATE TABLE Pertence (
-    ID INT PRIMARY KEY AUTO_INCREMENT,
+    ID INT AUTO_INCREMENT PRIMARY KEY,
     fk_Aviao_ID INT NOT NULL,
-    fk_CompanhiaAerea_ID INT NOT NULL
+    fk_CompanhiaAerea_ID INT NOT NULL,
+    CONSTRAINT FK_Pertence_Aviao FOREIGN KEY (fk_Aviao_ID)
+        REFERENCES Aviao(ID) ON DELETE RESTRICT,
+    CONSTRAINT FK_Pertence_Companhia FOREIGN KEY (fk_CompanhiaAerea_ID)
+        REFERENCES CompanhiaAerea(ID) ON DELETE RESTRICT
 );
-
-ALTER TABLE Clientes ADD CONSTRAINT FK_Clientes_2
-    FOREIGN KEY (fk_Passagens_ID)
-    REFERENCES Passagens (ID)
-    ON DELETE CASCADE;
-
-ALTER TABLE Passagens ADD CONSTRAINT FK_Passagens_2
-    FOREIGN KEY (fk_CompanhiaAerea_ID)
-    REFERENCES CompanhiaAerea (ID)
-    ON DELETE RESTRICT;
-
-ALTER TABLE Passagens ADD CONSTRAINT FK_Passagens_3
-    FOREIGN KEY (fk_Aviao_ID)
-    REFERENCES Aviao (ID)
-    ON DELETE RESTRICT;
-
-ALTER TABLE Passageiro ADD CONSTRAINT FK_Passageiro_1
-    FOREIGN KEY (fk_CompanhiaAerea_ID)
-    REFERENCES CompanhiaAerea (ID)
-    ON DELETE RESTRICT;
-
-ALTER TABLE Passageiro ADD CONSTRAINT FK_Passageiro_2
-    FOREIGN KEY (fk_Clientes_ID)
-    REFERENCES Clientes (ID)
-    ON DELETE RESTRICT;
-
-ALTER TABLE Pertence ADD CONSTRAINT FK_Pertence_1
-    FOREIGN KEY (fk_Aviao_ID)
-    REFERENCES Aviao (ID)
-    ON DELETE RESTRICT;
-
-ALTER TABLE Pertence ADD CONSTRAINT FK_Pertence_2
-    FOREIGN KEY (fk_CompanhiaAerea_ID)
-    REFERENCES CompanhiaAerea (ID)
-    ON DELETE RESTRICT;

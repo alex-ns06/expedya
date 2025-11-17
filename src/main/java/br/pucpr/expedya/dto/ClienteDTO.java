@@ -1,6 +1,7 @@
 package br.pucpr.expedya.dto;
 
 import br.pucpr.expedya.security.Role;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -13,31 +14,26 @@ import lombok.NoArgsConstructor;
 public class ClienteDTO {
     private Long id;
 
-    @NotNull
     @NotBlank
     private String nomeCompleto;
 
-    @NotNull
     @NotBlank
     private String email;
 
-    @NotNull
     @NotBlank
     private String telefone;
 
-    @NotNull
     @NotBlank
     private String cpf;
 
-    @NotNull
     @NotBlank
     private String passaporte;
 
-    @NotNull
-    @NotBlank
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String senha;
 
     private Role role;
 
     private Long passagemId;
 }
+

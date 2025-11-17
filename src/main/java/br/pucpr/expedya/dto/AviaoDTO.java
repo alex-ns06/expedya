@@ -24,10 +24,7 @@ public class AviaoDTO {
     private Integer capacidadePassageiros;
 
     @NotNull
-    private Set<Long> companhiaAereaId; // ID para integração
+    private Long companhiaAereaId;
 
-    private Set<String> nomesCompanhiasAereas; // Campo opcional para leitura
-
-    @NotNull
-    private Set<Long> passagemId; // ID para integração
+    private Set<Long> passagensId; // várias passagens
 }

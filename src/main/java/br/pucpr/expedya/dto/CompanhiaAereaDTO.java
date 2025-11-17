@@ -6,25 +6,22 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Set;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class CompanhiaAereaDTO {
-    private Integer id;
+    private Long id;
 
-    @NotNull
     @NotBlank
     private String nome;
 
-    @NotNull
     @NotBlank
     private String cnpj;
 
-    @NotNull
-    private Long passagensId; // ID para integração
+    private Set<Long> avioesId;
+    private Set<Long> passagensId;
 
-    @NotNull
-    private Long aviaoId; // ID para integração
-
-    private String modeloAviao; // Campo opcional para leitura
+    private Set<String> modelosAvioes; // opcional para leitura
 }

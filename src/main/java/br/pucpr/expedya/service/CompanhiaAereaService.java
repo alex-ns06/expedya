@@ -4,75 +4,92 @@ import br.pucpr.expedya.dto.CompanhiaAereaDTO;
 import br.pucpr.expedya.exception.ResourceNotFoundException;
 import br.pucpr.expedya.model.Aviao;
 import br.pucpr.expedya.model.CompanhiaAerea;
-import br.pucpr.expedya.model.Passagem;
 import br.pucpr.expedya.repository.AviaoRepository;
 import br.pucpr.expedya.repository.CompanhiaAereaRepository;
-import br.pucpr.expedya.repository.PassagemRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
 public class CompanhiaAereaService {
+
     private final CompanhiaAereaRepository companhiaAereaRepository;
-    private final PassagemRepository passagemRepository;
     private final AviaoRepository aviaoRepository;
 
-    public CompanhiaAereaDTO save(CompanhiaAereaDTO companhiaAereaDTO) {
-        Aviao aviao = aviaoRepository.findById((long) Math.toIntExact(companhiaAereaDTO.getAviaoId()))
-                .orElseThrow(() -> new ResourceNotFoundException("Avião não encontrado com id: " + companhiaAereaDTO.getAviaoId()));
+    // ============ CREATE ============
+    public CompanhiaAereaDTO save(CompanhiaAereaDTO dto) {
 
-        CompanhiaAerea companhiaAerea = toEntity(companhiaAereaDTO, aviao);
-        CompanhiaAerea savedCompanhiaAerea = companhiaAereaRepository.save(companhiaAerea);
-        return toDTO(savedCompanhiaAerea);
+        Aviao aviao = aviaoRepository.findById(dto.getAviaoId())
+                .orElseThrow(() -> new ResourceNotFoundException("Avião não encontrado: " + dto.getAviaoId()));
+
+        CompanhiaAerea nova = toEntity(dto, Set.of(aviao));
+
+        return toDTO(companhiaAereaRepository.save(nova));
     }
 
-    public CompanhiaAereaDTO update(Integer id, CompanhiaAereaDTO companhiaAereaDTO) {
-        CompanhiaAerea companhiaExistente = companhiaAereaRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("CompanhiaAerea não encontrada com id: " + id));
+    // ============ UPDATE ============
+    public CompanhiaAereaDTO update(Long id, CompanhiaAereaDTO dto) {
 
-        Aviao aviao = aviaoRepository.findById((long) Math.toIntExact(companhiaAereaDTO.getAviaoId()))
-                .orElseThrow(() -> new ResourceNotFoundException("Avião não encontrado com id: " + companhiaAereaDTO.getAviaoId()));
+        CompanhiaAerea existente = companhiaAereaRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Companhia não encontrada: " + id));
 
-        companhiaExistente.setNome(companhiaAereaDTO.getNome());
-        companhiaExistente.setCnpj(companhiaAereaDTO.getCnpj());
-        companhiaExistente.setPassagensId(companhiaAereaDTO.getPassagensId());
-        companhiaExistente.setAvioes(Set.of(aviao));
+        Aviao aviao = aviaoRepository.findById(dto.getAviaoId())
+                .orElseThrow(() -> new ResourceNotFoundException("Avião não encontrado: " + dto.getAviaoId()));
 
-        CompanhiaAerea updatedCompanhia = companhiaAereaRepository.save(companhiaExistente);
+        existente.setNome(dto.getNome());
+        existente.setCnpj(dto.getCnpj());
+        existente.setAvioes(Set.of(aviao));
 
-        return toDTO(updatedCompanhia);
+        return toDTO(companhiaAereaRepository.save(existente));
     }
 
-    public List<CompanhiaAerea> findAll() {
-        return companhiaAereaRepository.findAll();
+    // ============ GET ALL ============
+    public List<CompanhiaAereaDTO> findAll() {
+        return companhiaAereaRepository.findAll()
+                .stream()
+                .map(this::toDTO)
+                .toList();
     }
 
-    public void delete(Integer id) {
+    // ============ GET BY ID ============
+    public CompanhiaAereaDTO findById(Long id) {
+        CompanhiaAerea companhia = companhiaAereaRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Companhia não encontrada: " + id));
+        return toDTO(companhia);
+    }
+
+    // ============ DELETE ============
+    public void delete(Long id) {
+        if (!companhiaAereaRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Companhia não encontrada: " + id);
+        }
         companhiaAereaRepository.deleteById(id);
     }
 
-    private CompanhiaAereaDTO toDTO(CompanhiaAerea companhiaAerea) {
-        return new CompanhiaAereaDTO(
-                Math.toIntExact(companhiaAerea.getId()),
-                companhiaAerea.getNome(),
-                companhiaAerea.getCnpj(),
-                companhiaAerea.getPassagens().stream().map(Passagem::getId).findFirst().orElse(null),
-                companhiaAerea.getAvioes().stream().map(Aviao::getId).findAny().orElse(null),
-                companhiaAerea.getAvioes().stream().map(Aviao::getModelo).findFirst().orElse(null)
-        );
+    // ============ DTO → ENTITY ============
+    private CompanhiaAerea toEntity(CompanhiaAereaDTO dto, Set<Aviao> avioes) {
+        CompanhiaAerea c = new CompanhiaAerea();
+        c.setNome(dto.getNome());
+        c.setCnpj(dto.getCnpj());
+        c.setAvioes(avioes);
+        return c;
     }
 
-    private CompanhiaAerea toEntity(CompanhiaAereaDTO dto, Aviao aviao) {
-        CompanhiaAerea companhiaAerea = new CompanhiaAerea();
-        companhiaAerea.setNome(dto.getNome());
-        companhiaAerea.setCnpj(dto.getCnpj());
-        companhiaAerea.setPassagensId(dto.getPassagensId());
-        companhiaAerea.setAvioes(Set.of(aviao));
-        return companhiaAerea;
+    // ============ ENTITY → DTO ============
+    private CompanhiaAereaDTO toDTO(CompanhiaAerea c) {
+        Long aviaoId = c.getAvioes().stream().findFirst().map(Aviao::getId).orElse(null);
+        String modeloAviao = c.getAvioes().stream().findFirst().map(Aviao::getModelo).orElse(null);
+
+        return new CompanhiaAereaDTO(
+                c.getId(),
+                c.getNome(),
+                c.getCnpj(),
+                null,   // removido porque passagensId não pertence mais à entidade
+                aviaoId,
+                modeloAviao
+        );
     }
 }
