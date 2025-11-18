@@ -3,10 +3,7 @@ package br.pucpr.expedya.controller;
 import br.pucpr.expedya.dto.AviaoDTO;
 import br.pucpr.expedya.model.Aviao;
 import br.pucpr.expedya.service.AviaoService;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -22,32 +19,35 @@ public class AviaoController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Aviao> save(@RequestBody Aviao aviao) {
-        return ResponseEntity.ok(aviaoService.save(aviao));
+    public ResponseEntity<AviaoDTO> save(@RequestBody AviaoDTO aviaoDTO) {
+        return ResponseEntity.ok(aviaoService.save(aviaoDTO));
     }
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<Aviao>> findAll() {
+    public ResponseEntity<List<AviaoDTO>> findAll() {
         return ResponseEntity.ok(aviaoService.findAll());
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Aviao> findById(@PathVariable Long id) {
+    public ResponseEntity<AviaoDTO> findById(@PathVariable Long id) {
         return ResponseEntity.ok(aviaoService.findById(id));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Aviao> update(@PathVariable Long id, @RequestBody Aviao aviao) {
-        return ResponseEntity.ok(aviaoService.update(id, aviao));
+    public ResponseEntity<AviaoDTO> update(@PathVariable Long id, @RequestBody AviaoDTO dto) {
+        return ResponseEntity.ok(aviaoService.update(id, dto));
     }
 
     @PatchMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Aviao> partialUpdate(@PathVariable Long id, @RequestBody Aviao aviao) {
-        return ResponseEntity.ok(aviaoService.partialUpdate(id, aviao));
+    public ResponseEntity<AviaoDTO> partialUpdate(
+            @PathVariable Long id,
+            @RequestBody AviaoDTO dto
+    ) {
+        return ResponseEntity.ok(aviaoService.partialUpdate(id, dto));
     }
 
     @DeleteMapping("/{id}")

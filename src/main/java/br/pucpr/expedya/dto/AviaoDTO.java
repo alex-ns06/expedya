@@ -27,4 +27,6 @@ public class AviaoDTO {
     private Long companhiaAereaId;
 
     private Set<Long> passagensId; // várias passagens
+
+
 }

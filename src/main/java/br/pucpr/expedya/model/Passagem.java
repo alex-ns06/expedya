@@ -58,4 +58,8 @@ public class Passagem {
     @JsonManagedReference
     @ToString.Exclude
     private List<Cliente> clientes = new ArrayList<>();
+
+    public Thread getCliente() {
+        return null;
+    }
 }

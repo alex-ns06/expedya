@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -16,11 +17,10 @@ import java.util.Set;
 public class Aviao {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "avioes_generator")
-    @SequenceGenerator(name = "avioes_generator", sequenceName = "avioes_id_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "modelo", nullable = false)
+    @Column(nullable = false)
     private String modelo;
 
     @Column(name = "codigo_aeronave", nullable = false, unique = true)
@@ -30,20 +30,20 @@ public class Aviao {
     private Integer capacidadePassageiros;
 
     /**
-     * Relação de Aviao -> CompanhiaAerea: muitos aviões podem pertencer a uma companhia.
-     * Se quiser modelar como outro tipo (many-to-many), podemos ajustar depois.
+     * Muitos aviões pertencem a uma companhia aérea.
      */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "fk_companhiaaerea_id")
-    @ToString.Exclude
+    @JoinColumn(name = "fk_companhiaaerea_id", nullable = false)
     @JsonIgnore
+    @ToString.Exclude
     private CompanhiaAerea companhiaAerea;
 
     /**
      * Passagens associadas a este avião.
      */
-    @OneToMany(mappedBy = "aviao", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @ToString.Exclude
+    @OneToMany(mappedBy = "aviao", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
+    @ToString.Exclude
     private Set<Passagem> passagens = new HashSet<>();
+
 }

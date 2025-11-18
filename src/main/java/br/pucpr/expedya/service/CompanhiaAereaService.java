@@ -2,6 +2,7 @@ package br.pucpr.expedya.service;
 
 import br.pucpr.expedya.dto.CompanhiaAereaDTO;
 import br.pucpr.expedya.exception.ResourceNotFoundException;
+import br.pucpr.expedya.mapper.MapperDTO;
 import br.pucpr.expedya.model.Aviao;
 import br.pucpr.expedya.model.CompanhiaAerea;
 import br.pucpr.expedya.repository.AviaoRepository;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -18,78 +20,84 @@ public class CompanhiaAereaService {
 
     private final CompanhiaAereaRepository companhiaAereaRepository;
     private final AviaoRepository aviaoRepository;
+    private final MapperDTO mapperDTO;
 
-    // ============ CREATE ============
+    // ---------------- CREATE ----------------
     public CompanhiaAereaDTO save(CompanhiaAereaDTO dto) {
 
-        Aviao aviao = aviaoRepository.findById(dto.getAviaoId())
-                .orElseThrow(() -> new ResourceNotFoundException("Avião não encontrado: " + dto.getAviaoId()));
+        // Carregar aviões pelo ID
+        Set<Aviao> avioes = dto.getAvioesId() == null ? Set.of() :
+                dto.getAvioesId().stream()
+                        .map(id -> aviaoRepository.findById(id)
+                                .orElseThrow(() -> new ResourceNotFoundException("Avião não encontrado: " + id)))
+                        .collect(Collectors.toSet());
 
-        CompanhiaAerea nova = toEntity(dto, Set.of(aviao));
+        CompanhiaAerea nova = mapperDTO.toEntity(dto);
+        nova.setAvioes(avioes);
 
-        return toDTO(companhiaAereaRepository.save(nova));
+        CompanhiaAerea saved = companhiaAereaRepository.save(nova);
+        return mapperDTO.toDTO(saved);
     }
 
-    // ============ UPDATE ============
+    // ---------------- UPDATE (PUT) ----------------
     public CompanhiaAereaDTO update(Long id, CompanhiaAereaDTO dto) {
 
         CompanhiaAerea existente = companhiaAereaRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Companhia não encontrada: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Companhia aérea não encontrada: " + id));
 
-        Aviao aviao = aviaoRepository.findById(dto.getAviaoId())
-                .orElseThrow(() -> new ResourceNotFoundException("Avião não encontrado: " + dto.getAviaoId()));
+        Set<Aviao> avioes = dto.getAvioesId() == null ? Set.of() :
+                dto.getAvioesId().stream()
+                        .map(aviaoId -> aviaoRepository.findById(aviaoId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Avião não encontrado: " + aviaoId)))
+                        .collect(Collectors.toSet());
 
         existente.setNome(dto.getNome());
         existente.setCnpj(dto.getCnpj());
-        existente.setAvioes(Set.of(aviao));
+        existente.setAvioes(avioes);
 
-        return toDTO(companhiaAereaRepository.save(existente));
+        return mapperDTO.toDTO(companhiaAereaRepository.save(existente));
     }
 
-    // ============ GET ALL ============
+    // ---------------- GET ALL ----------------
     public List<CompanhiaAereaDTO> findAll() {
         return companhiaAereaRepository.findAll()
                 .stream()
-                .map(this::toDTO)
+                .map(mapperDTO::toDTO)
                 .toList();
     }
 
-    // ============ GET BY ID ============
+    // ---------------- GET BY ID ----------------
     public CompanhiaAereaDTO findById(Long id) {
-        CompanhiaAerea companhia = companhiaAereaRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Companhia não encontrada: " + id));
-        return toDTO(companhia);
+        CompanhiaAerea c = companhiaAereaRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Companhia aérea não encontrada: " + id));
+        return mapperDTO.toDTO(c);
     }
 
-    // ============ DELETE ============
+    // ---------------- DELETE ----------------
     public void delete(Long id) {
         if (!companhiaAereaRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Companhia não encontrada: " + id);
+            throw new ResourceNotFoundException("Companhia aérea não encontrada: " + id);
         }
         companhiaAereaRepository.deleteById(id);
     }
 
-    // ============ DTO → ENTITY ============
-    private CompanhiaAerea toEntity(CompanhiaAereaDTO dto, Set<Aviao> avioes) {
-        CompanhiaAerea c = new CompanhiaAerea();
-        c.setNome(dto.getNome());
-        c.setCnpj(dto.getCnpj());
-        c.setAvioes(avioes);
-        return c;
-    }
+    // ---------------- PATCH ----------------
+    public CompanhiaAereaDTO partialUpdate(Long id, CompanhiaAereaDTO dto) {
 
-    // ============ ENTITY → DTO ============
-    private CompanhiaAereaDTO toDTO(CompanhiaAerea c) {
-        Long aviaoId = c.getAvioes().stream().findFirst().map(Aviao::getId).orElse(null);
-        String modeloAviao = c.getAvioes().stream().findFirst().map(Aviao::getModelo).orElse(null);
+        CompanhiaAerea existente = companhiaAereaRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Companhia aérea não encontrada: " + id));
 
-        return new CompanhiaAereaDTO(
-                c.getId(),
-                c.getNome(),
-                c.getCnpj(),
-                null,   // removido porque passagensId não pertence mais à entidade
-                aviaoId,
-                modeloAviao
-        );
+        if (dto.getNome() != null) existente.setNome(dto.getNome());
+        if (dto.getCnpj() != null) existente.setCnpj(dto.getCnpj());
+
+        if (dto.getAvioesId() != null) {
+            Set<Aviao> novos = dto.getAvioesId().stream()
+                    .map(aid -> aviaoRepository.findById(aid)
+                            .orElseThrow(() -> new ResourceNotFoundException("Avião não encontrado: " + aid)))
+                    .collect(Collectors.toSet());
+            existente.setAvioes(novos);
+        }
+
+        return mapperDTO.toDTO(companhiaAereaRepository.save(existente));
     }
 }

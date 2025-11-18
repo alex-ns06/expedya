@@ -5,12 +5,15 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.time.*;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class PassagemDTO {
+
     private Long id;
 
     @NotBlank
@@ -32,4 +35,8 @@ public class PassagemDTO {
     private String classe;
 
     private Long aviaoId;
+
+    private Long companhiaAereaId;
+
+    private Long clienteId;
 }

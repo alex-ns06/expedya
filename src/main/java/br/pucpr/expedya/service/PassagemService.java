@@ -2,96 +2,80 @@ package br.pucpr.expedya.service;
 
 import br.pucpr.expedya.dto.PassagemDTO;
 import br.pucpr.expedya.exception.ResourceNotFoundException;
+import br.pucpr.expedya.mapper.MapperDTO;
 import br.pucpr.expedya.model.Passagem;
 import br.pucpr.expedya.repository.PassagemRepository;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
 public class PassagemService {
 
     private final PassagemRepository passagemRepository;
+    private final MapperDTO mapperDTO;
 
     // -------- CREATE --------
     public PassagemDTO save(PassagemDTO dto) {
-        Passagem passagem = toEntity(dto);
-        return toDTO(passagemRepository.save(passagem));
+        Passagem entity = mapperDTO.toEntity(dto);
+        return mapperDTO.toDTO(passagemRepository.save(entity));
     }
 
     // -------- GET ALL --------
     public List<PassagemDTO> findAll() {
         return passagemRepository.findAll()
                 .stream()
-                .map(this::toDTO)
-                .collect(Collectors.toList());
+                .map(mapperDTO::toDTO)
+                .toList();
     }
 
     // -------- GET BY ID --------
-    public PassagemDTO findById(Integer id) {
+    public PassagemDTO findById(Long id) {
         Passagem passagem = passagemRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Passagem não encontrada com id: " + id));
-        return toDTO(passagem);
+        return mapperDTO.toDTO(passagem);
     }
 
     // -------- DELETE --------
-    public void delete(Integer id) {
-        passagemRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Passagem não encontrada com id: " + id));
+    public void delete(Long id) {
+        if (!passagemRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Passagem não encontrada com id: " + id);
+        }
         passagemRepository.deleteById(id);
     }
 
     // -------- UPDATE (PUT) --------
-    public PassagemDTO update(Integer id, PassagemDTO dto) {
-        Passagem existing = passagemRepository.findById(id)
+    public PassagemDTO update(Long id, PassagemDTO dto) {
+
+        passagemRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Passagem não encontrada com id: " + id));
 
-        Passagem updated = toEntity(dto);
+        Passagem updated = mapperDTO.toEntity(dto);
         updated.setId(id);
 
-        return toDTO(passagemRepository.save(updated));
+        return mapperDTO.toDTO(passagemRepository.save(updated));
     }
 
-    // -------- UPDATE PARCIAL (PATCH) --------
-    public PassagemDTO partialUpdate(Integer id, PassagemDTO dto) {
-        Passagem passagem = passagemRepository.findById(id)
+    // -------- PATCH --------
+    public PassagemDTO partialUpdate(Long id, PassagemDTO dto) {
+
+        Passagem existente = passagemRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Passagem não encontrada com id: " + id));
 
-        BeanUtils.copyProperties(dto, passagem, getNullProperties(dto));
+        if (dto.getOrigem() != null) existente.setOrigem(dto.getOrigem());
+        if (dto.getDestino() != null) existente.setDestino(dto.getDestino());
+        if (dto.getDataPartida() != null) existente.setDataPartida(dto.getDataPartida());
+        if (dto.getHoraPartida() != null) existente.setHoraPartida(dto.getHoraPartida());
+        if (dto.getAssento() != null) existente.setAssento(dto.getAssento());
+        if (dto.getClasse() != null) existente.setClasse(dto.getClasse());
 
-        return toDTO(passagemRepository.save(passagem));
-    }
-
-    // --- DTO → ENTITY ---
-    private Passagem toEntity(PassagemDTO dto) {
-        Passagem passagem = new Passagem();
-        BeanUtils.copyProperties(dto, passagem);
-        return passagem;
-    }
-
-    // --- ENTITY → DTO ---
-    private PassagemDTO toDTO(Passagem passagem) {
-        PassagemDTO dto = new PassagemDTO();
-        BeanUtils.copyProperties(passagem, dto);
-        return dto;
-    }
-
-    private String[] getNullProperties(Object source) {
-        final BeanWrapper src = new BeanWrapperImpl(source);
-        Set<String> empty = new HashSet<>();
-
-        for (var pd : src.getPropertyDescriptors()) {
-            Object value = src.getPropertyValue(pd.getName());
-            if (value == null) empty.add(pd.getName());
+        // Se quiser atualizar o avião no PATCH
+        if (dto.getAviaoId() != null) {
+            existente.setAviao( mapperDTO.getAviaoById(dto.getAviaoId()) );
         }
-        return empty.toArray(new String[0]);
+
+        return mapperDTO.toDTO(passagemRepository.save(existente));
     }
 }

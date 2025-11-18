@@ -1,7 +1,9 @@
 package br.pucpr.expedya.mapper;
 
 import br.pucpr.expedya.dto.*;
+import br.pucpr.expedya.exception.ResourceNotFoundException;
 import br.pucpr.expedya.model.*;
+import br.pucpr.expedya.repository.AviaoRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 
@@ -9,6 +11,13 @@ import java.util.stream.Collectors;
 
 @Component
 public class MapperDTO {
+
+    private final AviaoRepository aviaoRepository;
+
+    // Construtor injetado pelo Spring
+    public MapperDTO(AviaoRepository aviaoRepository) {
+        this.aviaoRepository = aviaoRepository;
+    }
 
     /* ============================================================
        ===============   CLIENTE   ================================
@@ -20,7 +29,7 @@ public class MapperDTO {
         ClienteDTO dto = new ClienteDTO();
         BeanUtils.copyProperties(cliente, dto);
 
-        dto.setSenha(null); // Nunca retorna senha
+        dto.setSenha(null); // segurança
         return dto;
     }
 
@@ -32,6 +41,7 @@ public class MapperDTO {
         return cliente;
     }
 
+
     /* ============================================================
        ===============   AVIÃO   ==================================
        ============================================================ */
@@ -42,26 +52,13 @@ public class MapperDTO {
         AviaoDTO dto = new AviaoDTO();
         BeanUtils.copyProperties(aviao, dto);
 
-        if (aviao.getCompanhiasAereas() != null) {
-            dto.setCompanhiaAereaId(
-                    aviao.getCompanhiasAereas()
-                            .stream()
-                            .map(CompanhiaAerea::getId)
-                            .collect(Collectors.toSet())
-            );
-
-            dto.setNomesCompanhiasAereas(
-                    aviao.getCompanhiasAereas()
-                            .stream()
-                            .map(CompanhiaAerea::getNome)
-                            .collect(Collectors.toSet())
-            );
+        if (aviao.getCompanhiaAerea() != null) {
+            dto.setCompanhiaAereaId(aviao.getCompanhiaAerea().getId());
         }
 
         if (aviao.getPassagens() != null) {
-            dto.setPassagemId(
-                    aviao.getPassagens()
-                            .stream()
+            dto.setPassagensId(
+                    aviao.getPassagens().stream()
                             .map(Passagem::getId)
                             .collect(Collectors.toSet())
             );
@@ -75,34 +72,40 @@ public class MapperDTO {
 
         Aviao aviao = new Aviao();
         BeanUtils.copyProperties(dto, aviao);
-
-        // Não preenchendo relacionamentos aqui
-        // Eles devem ser setados no Service (boa prática)
         return aviao;
     }
+
 
     /* ============================================================
        ===============   COMPANHIA AÉREA   =========================
        ============================================================ */
 
-    public CompanhiaAereaDTO toDTO(CompanhiaAerea compania) {
-        if (compania == null) return null;
+    public CompanhiaAereaDTO toDTO(CompanhiaAerea companhia) {
+        if (companhia == null) return null;
 
         CompanhiaAereaDTO dto = new CompanhiaAereaDTO();
-        BeanUtils.copyProperties(compania, dto);
+        BeanUtils.copyProperties(companhia, dto);
 
-        if (compania.getPassagens() != null) {
-            dto.setPassagensId(
-                    compania.getPassagens()
-                            .stream()
-                            .map(Passagem::getId)
-                            .collect(Collectors.toList())
+        if (companhia.getAvioes() != null) {
+            dto.setAvioesId(
+                    companhia.getAvioes().stream()
+                            .map(Aviao::getId)
+                            .collect(Collectors.toSet())
+            );
+
+            dto.setModelosAvioes(
+                    companhia.getAvioes().stream()
+                            .map(Aviao::getModelo)
+                            .collect(Collectors.toSet())
             );
         }
 
-        if (compania.getAviao() != null) {
-            dto.setAviaoId(compania.getAviao().getId());
-            dto.setModeloAviao(compania.getAviao().getModelo());
+        if (companhia.getPassagens() != null) {
+            dto.setPassagensId(
+                    companhia.getPassagens().stream()
+                            .map(Passagem::getId)
+                            .collect(Collectors.toSet())
+            );
         }
 
         return dto;
@@ -111,11 +114,11 @@ public class MapperDTO {
     public CompanhiaAerea toEntity(CompanhiaAereaDTO dto) {
         if (dto == null) return null;
 
-        CompanhiaAerea compania = new CompanhiaAerea();
-        BeanUtils.copyProperties(dto, compania);
-        // Relacionamentos são tratados no service
-        return compania;
+        CompanhiaAerea companhia = new CompanhiaAerea();
+        BeanUtils.copyProperties(dto, companhia);
+        return companhia;
     }
+
 
     /* ============================================================
        ===============   PASSAGEM   ================================
@@ -145,7 +148,20 @@ public class MapperDTO {
 
         Passagem passagem = new Passagem();
         BeanUtils.copyProperties(dto, passagem);
-        // Relacionamentos são preenchidos no service
         return passagem;
+    }
+
+
+    /* ============================================================
+       ===============   MÉTODOS AUXILIARES (BUSCAS)   ============
+       ============================================================ */
+
+    /**
+     * Busca Aviao por id. Lança ResourceNotFoundException se não existir.
+     * (Você pediu que o Mapper faça a busca — injetamos AviaoRepository para isso.)
+     */
+    public Aviao getAviaoById(Long id) {
+        return aviaoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Avião não encontrado com id: " + id));
     }
 }

@@ -2,27 +2,25 @@ package br.pucpr.expedya.model;
 
 import br.pucpr.expedya.security.Role;
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Data;
+
+import java.util.List;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 @Entity
 @Table(name = "clientes")
 public class Cliente {
-
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "clientes_generator")
     @SequenceGenerator(name = "clientes_generator", sequenceName = "clientes_id_seq", allocationSize = 1)
     private Long id;
 
-    @Column(name = "nome", nullable = false)
+    @Column(name = "nome")
     private String nomeCompleto;
 
-    @Column(name = "email", nullable = false, unique = true)
+    @Column(name = "email")
     private String email;
 
     @Column(name = "telefone")
@@ -34,10 +32,6 @@ public class Cliente {
     @Column(name = "passaporte")
     private String passaporte;
 
-    /**
-     * Não será exposto nas respostas JSON (apenas recebido em requests).
-     */
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Column(name = "senha")
     private String senha;
 
@@ -46,8 +40,7 @@ public class Cliente {
     private Role role; // ADMIN / USER
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "fk_passagens_id")
-    @JsonBackReference
-    @ToString.Exclude
+    @JoinColumn(name = "fk_passagens_id") // FK da tabela 'clientes'
+    @JsonBackReference // Evita loop infinito
     private Passagem passagem;
 }

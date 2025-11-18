@@ -23,5 +23,6 @@ public class CompanhiaAereaDTO {
     private Set<Long> avioesId;
     private Set<Long> passagensId;
 
-    private Set<String> modelosAvioes; // opcional para leitura
+    private Set<String> modelosAvioes;
 }
+

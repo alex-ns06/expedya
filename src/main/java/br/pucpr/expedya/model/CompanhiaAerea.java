@@ -37,5 +37,6 @@ public class CompanhiaAerea {
      */
     @OneToMany(mappedBy = "companhiaAerea", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @ToString.Exclude
-    private Set<Passagem> passagens = new HashSet<>();
+    private Set<Passagem> passagens = new HashSet<>();;
+
 }
