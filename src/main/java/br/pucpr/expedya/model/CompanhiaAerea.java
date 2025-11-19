@@ -25,7 +25,7 @@ public class CompanhiaAerea {
     @Column(name = "nome", nullable = false)
     private String nome;
 
-    @Column(name = "cnpj", unique = true)
+    @Column(name = "cnpj", unique = true, length = 18)
     private String cnpj;
 
     // Aviões dessa companhia
