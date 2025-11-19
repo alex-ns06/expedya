@@ -22,14 +22,15 @@ public class AviaoService {
 
     // =============== CREATE ===============
     public AviaoDTO save(AviaoDTO dto) {
+        if (dto.getCompanhiaAereaId() == null) {
+            throw new IllegalArgumentException("O ID da companhia aérea é obrigatório.");
+        }
 
-        CompanhiaAerea companhia =
-                companhiaAereaRepository.findById(dto.getCompanhiaAereaId())
-                        .orElseThrow(() -> new ResourceNotFoundException(
-                                "Companhia aérea não encontrada: " + dto.getCompanhiaAereaId()));
+        CompanhiaAerea companhia = companhiaAereaRepository.findById(dto.getCompanhiaAereaId())
+                .orElseThrow(() -> new ResourceNotFoundException("Companhia não encontrada"));
 
         Aviao aviao = mapperDTO.toEntity(dto);
-        aviao.setCompanhiaAerea(companhia);
+        aviao.setCompanhiaAerea(companhia); // Vincula o pai ao filho
 
         Aviao saved = aviaoRepository.save(aviao);
         return mapperDTO.toDTO(saved);

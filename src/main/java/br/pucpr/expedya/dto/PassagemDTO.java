@@ -34,9 +34,14 @@ public class PassagemDTO {
     @NotBlank
     private String classe;
 
+    // Avião pode ser null na compra (voo não alocado ainda), então sem @NotNull
     private Long aviaoId;
 
+    // ALTERAÇÃO: Adicionado @NotNull (Obrigatório)
+    @NotNull(message = "O ID da companhia aérea é obrigatório")
     private Long companhiaAereaId;
 
+    // ALTERAÇÃO: Adicionado @NotNull (Obrigatório)
+    @NotNull(message = "O ID do cliente é obrigatório")
     private Long clienteId;
 }

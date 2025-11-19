@@ -4,32 +4,36 @@ import br.pucpr.expedya.security.Role;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "clientes")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Cliente {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "clientes_generator")
     @SequenceGenerator(name = "clientes_generator", sequenceName = "clientes_id_seq", allocationSize = 1)
+    @EqualsAndHashCode.Include
     private Long id;
 
     @Column(name = "nome")
     private String nomeCompleto;
 
-    @Column(name = "email")
+    @Column(name = "email", unique = true, nullable = false)
     private String email;
 
     @Column(name = "telefone")
     private String telefone;
 
-    @Column(name = "cpf")
+    @Column(name = "cpf", unique = true)
     private String cpf;
 
-    @Column(name = "passaporte")
+    @Column(name = "passaporte", unique = true)
     private String passaporte;
 
     @Column(name = "senha")
@@ -39,8 +43,7 @@ public class Cliente {
     @Column(name = "funcao")
     private Role role; // ADMIN / USER
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "fk_passagens_id") // FK da tabela 'clientes'
-    @JsonBackReference // Evita loop infinito
-    private Passagem passagem;
+    @OneToMany(mappedBy = "cliente", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    private List<Passagem> passagens = new ArrayList<>();
 }

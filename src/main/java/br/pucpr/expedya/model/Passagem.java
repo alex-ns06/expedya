@@ -1,5 +1,6 @@
 package br.pucpr.expedya.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
@@ -9,18 +10,20 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Entity
 @Table(name = "passagens")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Passagem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "passagens_generator")
     @SequenceGenerator(name = "passagens_generator", sequenceName = "passagens_id_seq", allocationSize = 1)
-    @Column(name = "id")
+    @EqualsAndHashCode.Include
     private Long id;
 
     @Column(name = "origem", nullable = false)
@@ -41,25 +44,19 @@ public class Passagem {
     @Column(name = "classe")
     private String classe;
 
-    // Mantemos referência explícita à companhia aérea (opcional)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "fk_companhiaaerea_id")
+    @JoinColumn(name = "fk_companhiaaerea_id", nullable = false)
     @ToString.Exclude
     private CompanhiaAerea companhiaAerea;
 
-    // Avião usado pela passagem
+    // Avião pode ser opcional no início (ex: venda antes de definir a aeronave exata)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fk_aviao_id")
     @ToString.Exclude
     private Aviao aviao;
 
-    // Clientes que possuem essa passagem (1 passagem pode ter vários clientes)
-    @OneToMany(mappedBy = "passagem", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @JsonManagedReference
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "fk_cliente_id", nullable = false)
     @ToString.Exclude
-    private List<Cliente> clientes = new ArrayList<>();
-
-    public Thread getCliente() {
-        return null;
-    }
+    private Cliente cliente;
 }

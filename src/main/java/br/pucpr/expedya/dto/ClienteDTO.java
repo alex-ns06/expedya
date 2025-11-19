@@ -3,10 +3,11 @@ package br.pucpr.expedya.dto;
 import br.pucpr.expedya.security.Role;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.Set; // Importante para a lista de IDs
 
 @Data
 @AllArgsConstructor
@@ -34,6 +35,5 @@ public class ClienteDTO {
 
     private Role role;
 
-    private Long passagemId;
+    private Set<Long> passagensId;
 }
-

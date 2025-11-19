@@ -26,7 +26,5 @@ public class AviaoDTO {
     @NotNull
     private Long companhiaAereaId;
 
-    private Set<Long> passagensId; // várias passagens
-
-
+    private Set<Long> passagensId;
 }
