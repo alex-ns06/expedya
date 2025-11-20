@@ -14,7 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/avioes")
-@Tag(name = "Aviões", description = "Gerencia aeronaves utilizadas nos voos.")
+@Tag(name = "aviao-controller", description = "Gerencia aeronaves utilizadas nos voos.")
 @GlobalApiResponses
 @RequiredArgsConstructor
 public class AviaoController {

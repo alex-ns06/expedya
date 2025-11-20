@@ -14,7 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/passagens")
-@Tag(name = "Passagens", description = "Gerencia reserva, consulta e atualização de passagens aéreas.")
+@Tag(name = "passagem-controller", description = "Gerencia reserva, consulta e atualização de passagens aéreas.")
 @GlobalApiResponses
 @RequiredArgsConstructor
 public class PassagemController {

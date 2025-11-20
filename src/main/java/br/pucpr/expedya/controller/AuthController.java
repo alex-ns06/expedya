@@ -17,7 +17,7 @@ import java.util.Date;
 
 @RestController
 @RequestMapping("/api/v1/auth")
-@Tag(name = "Autenticação", description = "Realiza o login de clientes.")
+@Tag(name = "auth-controller", description = "Realiza o login de clientes.")
 @GlobalApiResponses
 public class AuthController {
 

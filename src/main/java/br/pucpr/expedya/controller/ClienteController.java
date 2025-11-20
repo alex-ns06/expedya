@@ -17,7 +17,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/clientes")
-@Tag(name = "Clientes", description = "Gerencia o cadastro, consulta e atualização de clientes.")
+@Tag(name = "cliente-controller", description = "Gerencia o cadastro, consulta e atualização de clientes.")
 @GlobalApiResponses
 @SecurityRequirement(name = "Bearer Authentication")
 public class ClienteController {
