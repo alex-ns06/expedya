@@ -1,6 +1,6 @@
 Integrantes do grupo:
-Alex Narok Stavasz
-Rafael Giroldo Gabardo
+- Alex Narok Stavasz
+- Rafael Giroldo Gabardo
 
 BSI 4 A N - PUCPR - 2 sem 2025
 
