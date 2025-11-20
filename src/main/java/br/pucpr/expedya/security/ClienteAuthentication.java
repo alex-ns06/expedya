@@ -8,7 +8,7 @@
     import java.util.List;
 
     public class ClienteAuthentication implements UserDetails {
-        private Integer id;
+        private Long id;
         private String nomeCompleto;
         private String email;
         private String cpf;
@@ -31,11 +31,11 @@
             return email;
         }
 
-        public Integer getId() {
+        public Long getId() {
             return id;
         }
 
-        public void setId(Integer id) {
+        public void setId(Long id) {
             this.id = id;
         }
 

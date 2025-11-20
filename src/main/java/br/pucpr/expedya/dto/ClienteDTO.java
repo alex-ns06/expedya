@@ -2,6 +2,7 @@ package br.pucpr.expedya.dto;
 
 import br.pucpr.expedya.security.Role;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -15,6 +16,8 @@ import java.util.Set; // Importante para a lista de IDs
 @AllArgsConstructor
 @NoArgsConstructor
 public class ClienteDTO {
+
+    @Schema(hidden = true)
     private Long id;
 
     @NotBlank
@@ -39,5 +42,6 @@ public class ClienteDTO {
 
     private Role role;
 
+    @Schema(hidden = true)
     private Set<Long> passagensId;
 }

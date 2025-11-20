@@ -1,5 +1,6 @@
 package br.pucpr.expedya.security;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -29,7 +30,9 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+    public AuthenticationManager authenticationManager(
+            AuthenticationConfiguration authenticationConfiguration
+    ) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
@@ -38,20 +41,35 @@ public class SecurityConfig {
 
         http
                 // Desativa CSRF para APIs REST
-                .csrf(csrf -> csrf.disable())
+                .csrf(cs -> cs.disable())
 
-                // Necessário para permitir o H2 usar frames HTML
-                .headers(headers -> headers.frameOptions(frame -> frame.disable()))
+                // Necessário para H2
+                .headers(h -> h.frameOptions(f -> f.disable()))
 
-                // Política stateless (JWT)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                // Stateless (JWT)
+                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
+                // ==========================
+                // TRATAMENTO DE ERROS
+                // ==========================
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((req, res, e) ->
+                                res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "401 Unauthorized")
+                        )
+                        .accessDeniedHandler((req, res, e) ->
+                                res.sendError(HttpServletResponse.SC_FORBIDDEN, "403 Forbidden - Sem permissão")
+                        )
+                )
+
+                // ==========================
+                // AUTORIZAÇÕES
+                // ==========================
                 .authorizeHttpRequests(auth -> auth
 
-                        // H2 Console liberado
+                        // Public: H2
                         .requestMatchers("/h2-console/**").permitAll()
 
-                        // Swagger liberado
+                        // Public: Swagger
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
@@ -60,15 +78,15 @@ public class SecurityConfig {
                                 "/webjars/**"
                         ).permitAll()
 
-                        // Endpoints públicos
-                        .requestMatchers("/api/v1/auth/**").permitAll() // Login
-                        .requestMatchers(HttpMethod.POST, "/api/v1/clientes").permitAll() // Cadastro de cliente
+                        // Public: autenticação e cadastro
+                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/clientes").permitAll()
 
-                        // Todo o resto exige autenticação
+                        // Todo o resto exige token
                         .anyRequest().authenticated()
                 )
 
-                // Filtro JWT antes do filtro padrão
+                // Filtro JWT antes do UsernamePasswordAuthenticationFilter
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

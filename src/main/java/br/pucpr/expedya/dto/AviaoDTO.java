@@ -1,5 +1,6 @@
 package br.pucpr.expedya.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -12,6 +13,8 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AviaoDTO {
+
+    @Schema(hidden = true)
     private Long id;
 
     @NotBlank
@@ -26,5 +29,6 @@ public class AviaoDTO {
     @NotNull
     private Long companhiaAereaId;
 
+    @Schema(hidden = true)
     private Set<Long> passagensId;
 }

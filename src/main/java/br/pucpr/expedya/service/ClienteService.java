@@ -113,4 +113,10 @@ public class ClienteService {
                 .filter(name -> src.getPropertyValue(name) == null)
                 .toArray(String[]::new);
     }
+
+    public Cliente findByEmail(String email) {
+        return clienteRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado com email: " + email));
+    }
+
 }
