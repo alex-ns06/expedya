@@ -1,7 +1,11 @@
 package br.pucpr.expedya.controller;
 
+import br.pucpr.expedya.config.GlobalApiResponses;
 import br.pucpr.expedya.dto.ClienteDTO;
 import br.pucpr.expedya.service.ClienteService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -12,6 +16,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/clientes")
+@GlobalApiResponses
 @SecurityRequirement(name = "Bearer Authentication")
 public class ClienteController {
 
@@ -36,6 +41,10 @@ public class ClienteController {
     }
 
     // POST - Cadastrar novo cliente (PÚBLICO - Já configurado no SecurityConfig)
+    @Operation(summary = "Cria um cliente")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Criado")
+    })
     @PostMapping
     public ResponseEntity<ClienteDTO> save(@RequestBody ClienteDTO cliente) {
         return ResponseEntity.status(HttpStatus.CREATED).body(clienteService.save(cliente)); // MUDANÇA

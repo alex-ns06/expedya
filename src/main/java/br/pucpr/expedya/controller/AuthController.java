@@ -1,5 +1,6 @@
 package br.pucpr.expedya.controller;
 
+import br.pucpr.expedya.config.GlobalApiResponses;
 import br.pucpr.expedya.security.AuthRequest;
 import br.pucpr.expedya.security.AuthResponse;
 import br.pucpr.expedya.security.JwtUtil;
@@ -14,6 +15,7 @@ import java.util.Date; // <-- ADICIONE ESTE IMPORT
 
 @RestController
 @RequestMapping("/api/v1/auth")
+@GlobalApiResponses
 public class AuthController {
 
     private final JwtUtil jwtUtil;

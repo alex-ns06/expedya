@@ -1,5 +1,6 @@
 package br.pucpr.expedya.controller;
 
+import br.pucpr.expedya.config.GlobalApiResponses;
 import br.pucpr.expedya.dto.CompanhiaAereaDTO;
 import br.pucpr.expedya.service.CompanhiaAereaService;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/companhias")
+@GlobalApiResponses
 @RequiredArgsConstructor
 public class CompanhiaAereaController {
 

@@ -1,5 +1,6 @@
 package br.pucpr.expedya.controller;
 
+import br.pucpr.expedya.config.GlobalApiResponses;
 import br.pucpr.expedya.dto.AviaoDTO;
 import br.pucpr.expedya.model.Aviao;
 import br.pucpr.expedya.service.AviaoService;
@@ -12,6 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/avioes")
+@GlobalApiResponses
 @RequiredArgsConstructor
 public class AviaoController {
 

@@ -1,5 +1,6 @@
 package br.pucpr.expedya.controller;
 
+import br.pucpr.expedya.config.GlobalApiResponses;
 import br.pucpr.expedya.dto.PassagemDTO;
 import br.pucpr.expedya.service.PassagemService;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/passagens")
+@GlobalApiResponses
 @RequiredArgsConstructor
 public class PassagemController {
 
