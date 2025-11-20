@@ -164,5 +164,4 @@ public class MapperDTO {
         return passagem;
     }
 
-    // Removi o método getAviaoById pois ele usava o repositório.
 }

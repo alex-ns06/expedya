@@ -2,6 +2,7 @@ package br.pucpr.expedya.service;
 
 import br.pucpr.expedya.dto.ClienteDTO;
 import br.pucpr.expedya.exception.ResourceNotFoundException;
+import br.pucpr.expedya.mapper.MapperDTO;
 import br.pucpr.expedya.model.Cliente;
 import br.pucpr.expedya.security.Role;
 import br.pucpr.expedya.repository.ClienteRepository;
@@ -11,6 +12,7 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.List;
@@ -23,10 +25,11 @@ public class ClienteService {
 
     private final ClienteRepository clienteRepository;
     private final PasswordEncoder passwordEncoder;
+    private final MapperDTO mapper;  // <-- ADICIONE ISTO
 
     // ---------- CREATE ----------
     public ClienteDTO save(ClienteDTO dto) {
-        Cliente cliente = toEntity(dto);
+        Cliente cliente = mapper.toEntity(dto);
 
         cliente.setSenha(passwordEncoder.encode(dto.getSenha()));
 
@@ -34,7 +37,7 @@ public class ClienteService {
             cliente.setRole(Role.USER);
         }
 
-        return toDTO(clienteRepository.save(cliente));
+        return mapper.toDTO(clienteRepository.save(cliente));
     }
 
     // ---------- FULL UPDATE (PUT) ----------
@@ -42,7 +45,7 @@ public class ClienteService {
         Cliente existing = clienteRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado com id: " + id));
 
-        Cliente updated = toEntity(dto);
+        Cliente updated = mapper.toEntity(dto);
         updated.setId(id);
 
         if (dto.getSenha() == null || dto.getSenha().isEmpty()) {
@@ -51,7 +54,7 @@ public class ClienteService {
             updated.setSenha(passwordEncoder.encode(dto.getSenha()));
         }
 
-        return toDTO(clienteRepository.save(updated));
+        return mapper.toDTO(clienteRepository.save(updated));
     }
 
     // ---------- PARTIAL UPDATE (PATCH) ----------
@@ -65,22 +68,25 @@ public class ClienteService {
             cliente.setSenha(passwordEncoder.encode(dto.getSenha()));
         }
 
-        return toDTO(clienteRepository.save(cliente));
+        return mapper.toDTO(clienteRepository.save(cliente));
     }
 
     // ---------- GET ALL ----------
+    @Transactional(readOnly = true)
     public List<ClienteDTO> findAll() {
         return clienteRepository.findAll()
                 .stream()
-                .map(this::toDTO)
-                .collect(Collectors.toList());
+                .map(mapper::toDTO)
+                .toList();
     }
 
     // ---------- GET BY ID ----------
+    @Transactional(readOnly = true)
     public ClienteDTO findById(Long id) {
         Cliente cliente = clienteRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado com id: " + id));
-        return toDTO(cliente);
+
+        return mapper.toDTO(cliente);
     }
 
     // ---------- DELETE ----------
@@ -88,21 +94,6 @@ public class ClienteService {
         Cliente cliente = clienteRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado com id: " + id));
         clienteRepository.delete(cliente);
-    }
-
-    // ---------- MAPEAMENTO DTO → ENTITY ----------
-    private Cliente toEntity(ClienteDTO dto) {
-        Cliente cliente = new Cliente();
-        BeanUtils.copyProperties(dto, cliente);
-        return cliente;
-    }
-
-    // ---------- MAPEAMENTO ENTITY → DTO ----------
-    private ClienteDTO toDTO(Cliente cliente) {
-        ClienteDTO dto = new ClienteDTO();
-        BeanUtils.copyProperties(cliente, dto);
-        dto.setSenha(null);
-        return dto;
     }
 
     // ---------- IGNORA CAMPOS NULOS NO PATCH ----------
@@ -114,9 +105,9 @@ public class ClienteService {
                 .toArray(String[]::new);
     }
 
+    @Transactional(readOnly = true)
     public Cliente findByEmail(String email) {
         return clienteRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado com email: " + email));
     }
-
 }

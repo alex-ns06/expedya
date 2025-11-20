@@ -45,18 +45,22 @@ public class CompanhiaAereaService {
         CompanhiaAerea existente = companhiaAereaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Companhia aérea não encontrada: " + id));
 
-        Set<Aviao> avioes = dto.getAvioesId() == null ? Set.of() :
-                dto.getAvioesId().stream()
-                        .map(aviaoId -> aviaoRepository.findById(aviaoId)
-                                .orElseThrow(() -> new ResourceNotFoundException("Avião não encontrado: " + aviaoId)))
-                        .collect(Collectors.toSet());
-
         existente.setNome(dto.getNome());
         existente.setCnpj(dto.getCnpj());
-        existente.setAvioes(avioes);
+
+        // Só alterar aviões se DTO enviar a lista!
+        if (dto.getAvioesId() != null) {
+            Set<Aviao> avioes = dto.getAvioesId().stream()
+                    .map(aid -> aviaoRepository.findById(aid)
+                            .orElseThrow(() -> new ResourceNotFoundException("Avião não encontrado: " + aid)))
+                    .collect(Collectors.toSet());
+
+            existente.setAvioes(avioes);
+        }
 
         return mapperDTO.toDTO(companhiaAereaRepository.save(existente));
     }
+
 
     // ---------------- GET ALL ----------------
     public List<CompanhiaAereaDTO> findAll() {
@@ -90,13 +94,16 @@ public class CompanhiaAereaService {
         if (dto.getNome() != null) existente.setNome(dto.getNome());
         if (dto.getCnpj() != null) existente.setCnpj(dto.getCnpj());
 
+        Set<Aviao> avioes;
+
         if (dto.getAvioesId() != null) {
-            Set<Aviao> novos = dto.getAvioesId().stream()
+            avioes = dto.getAvioesId().stream()
                     .map(aid -> aviaoRepository.findById(aid)
                             .orElseThrow(() -> new ResourceNotFoundException("Avião não encontrado: " + aid)))
                     .collect(Collectors.toSet());
-            existente.setAvioes(novos);
+            existente.setAvioes(avioes);
         }
+        // se for null → mantém os atuais
 
         return mapperDTO.toDTO(companhiaAereaRepository.save(existente));
     }

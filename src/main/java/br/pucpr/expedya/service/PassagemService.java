@@ -64,24 +64,34 @@ public class PassagemService {
         Passagem existente = passagemRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Passagem não encontrada com id: " + id));
 
-        // Atualiza dados básicos via mapper ou setters manuais se preferir
         Passagem atualizada = mapperDTO.toEntity(dto);
         atualizada.setId(id);
 
-        // No PUT, precisamos garantir que as relações sejam mantidas ou atualizadas
+        // --- CLIENTE (FALTAVA) ---
+        if (dto.getClienteId() != null) {
+            Cliente cliente = clienteRepository.findById(dto.getClienteId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado: " + dto.getClienteId()));
+            atualizada.setCliente(cliente);
+        } else {
+            atualizada.setCliente(existente.getCliente());
+        }
+
+        // --- COMPANHIA ---
         if (dto.getCompanhiaAereaId() != null) {
             CompanhiaAerea companhia = companhiaAereaRepository.findById(dto.getCompanhiaAereaId())
                     .orElseThrow(() -> new ResourceNotFoundException("Companhia não encontrada"));
             atualizada.setCompanhiaAerea(companhia);
         } else {
-            // Mantém a companhia antiga se não foi enviada (ou lança erro, dependendo da sua regra)
             atualizada.setCompanhiaAerea(existente.getCompanhiaAerea());
         }
 
+        // --- AVIÃO ---
         if (dto.getAviaoId() != null) {
             Aviao aviao = aviaoRepository.findById(dto.getAviaoId())
                     .orElseThrow(() -> new ResourceNotFoundException("Avião não encontrado"));
             atualizada.setAviao(aviao);
+        } else {
+            atualizada.setAviao(existente.getAviao());
         }
 
         return mapperDTO.toDTO(passagemRepository.save(atualizada));
